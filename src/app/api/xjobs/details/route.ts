@@ -32,9 +32,32 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const response = await getTwitterJobById(body);
 
-    const nextResponse = NextResponse.json(response);
+    // Create custom req and res objects that mimic Express objects
+    const req = {
+      body
+    } as any;
+
+    let responseData: any = null;
+    let statusCode = 200;
+
+    // Create a custom response object that captures what the controller sends
+    const res = {
+      status: (code: number) => {
+        statusCode = code;
+        return res;
+      },
+      json: (data: any) => {
+        responseData = data;
+        return res;
+      }
+    } as any;
+
+    // Call the controller with our custom req and res objects
+    await getTwitterJobById(req, res);
+
+    // Use the response data captured by our custom res object
+    const nextResponse = NextResponse.json(responseData, { status: statusCode });
     return addCorsHeaders(nextResponse, origin);
   } catch (error) {
     console.error("Error in Twitter job details API:", error);
