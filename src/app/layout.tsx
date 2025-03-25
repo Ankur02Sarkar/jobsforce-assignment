@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Outfit, Poppins } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, GoogleOneTap } from "@clerk/nextjs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -90,6 +90,7 @@ export default function RootLayout({
         <body
           className={`${poppins.variable} ${outfit.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          <GoogleOneTap />
           {children}
         </body>
       </html>
