@@ -3,6 +3,7 @@ import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import React, { useEffect } from "react";
 import toast from "react-hot-toast";
+import { apiGet } from "@/lib/api";
 
 interface MainWrapperProps {
   children: React.ReactNode;
@@ -23,11 +24,12 @@ export function MainWrapper({ children }: MainWrapperProps) {
 
   const getUserDetails = async (clerkId: string) => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/clerk/${clerkId}`
+      const data = await apiGet<{ data: { token: string; user: any } }>(
+        `/api/users/clerk/${clerkId}`
       );
-      console.log("User details:", response.data);
-      const { token, user } = response.data?.data || {};
+      console.log("User details V2:", data);
+      const { token, user } = data?.data || {};
+
       if (user) {
         const combinedUser = { ...user, token };
         localStorage.setItem("currentUser", JSON.stringify(combinedUser));
