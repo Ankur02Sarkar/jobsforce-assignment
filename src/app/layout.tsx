@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Outfit, Poppins } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider, GoogleOneTap } from "@clerk/nextjs";
 import { HeroHeader } from "@/components/hero-header";
+import { MainWrapper } from "@/components/MainWrapper";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -93,9 +95,8 @@ export default function RootLayout({
         >
           <GoogleOneTap />
           <HeroHeader />
-          <main className="pt-24">
-            {children}
-          </main>
+          <Toaster position="top-center" reverseOrder={false} />
+          <MainWrapper>{children}</MainWrapper>
         </body>
       </html>
     </ClerkProvider>
