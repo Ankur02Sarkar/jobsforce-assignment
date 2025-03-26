@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { NextRequest, NextResponse } from "next/server";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -24,21 +23,4 @@ export function isAllowedOrigin(origin: string | null): boolean {
     }
     return false;
   });
-}
-
-// Helper function to add CORS headers
-export function addCorsHeaders(response: NextResponse, origin: string | null) {
-  if (!origin || isAllowedOrigin(origin)) {
-    response.headers.set("Access-Control-Allow-Origin", origin || "*");
-    response.headers.set(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    response.headers.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-    response.headers.set("Access-Control-Allow-Credentials", "true");
-  }
-  return response;
 }

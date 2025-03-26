@@ -8,9 +8,9 @@ import { Logo } from "./logo";
 import { SignedIn, SignedOut, useClerk, UserButton } from "@clerk/nextjs";
 
 const menuItems = [
-  { name: "Features", href: "#link" },
-  { name: "Solution", href: "#link" },
-  { name: "Pricing", href: "#link" },
+  { name: "Dashboard", href: "/dashboard" },
+  { name: "Profile", href: "/profile" },
+  { name: "AI Interview", href: "/interview" },
   { name: "About", href: "#link" },
 ];
 
