@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { Logo } from "./logo";
 import { SignedIn, SignedOut, useClerk, UserButton } from "@clerk/nextjs";
@@ -11,13 +12,14 @@ const menuItems = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Profile", href: "/profile" },
   { name: "AI Interview", href: "/interview" },
-  { name: "About", href: "#link" },
+  { name: "JobBoard", href: "/jobboard" },
 ];
 
 export const HeroHeader = () => {
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const clerk = useClerk();
+  const pathname = usePathname();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -44,7 +46,10 @@ export const HeroHeader = () => {
               <Link
                 href="/"
                 aria-label="home"
-                className="flex items-center space-x-2"
+                className={cn(
+                  "flex items-center space-x-2",
+                  pathname === "/" && "font-medium text-primary"
+                )}
               >
                 <Logo />
               </Link>
@@ -65,9 +70,22 @@ export const HeroHeader = () => {
                   <li key={index}>
                     <Link
                       href={item.href}
-                      className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                      className={cn(
+                        "block duration-150 relative group",
+                        pathname === item.href
+                          ? "font-medium text-primary"
+                          : "text-muted-foreground hover:text-accent-foreground"
+                      )}
                     >
                       <span>{item.name}</span>
+                      <span 
+                        className={cn(
+                          "absolute -bottom-1 left-0 h-0.5 bg-primary transform origin-left transition-all duration-300",
+                          pathname === item.href 
+                            ? "w-full"
+                            : "w-0 group-hover:w-full"
+                        )}
+                      />
                     </Link>
                   </li>
                 ))}
@@ -81,9 +99,22 @@ export const HeroHeader = () => {
                     <li key={index}>
                       <Link
                         href={item.href}
-                        className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                        className={cn(
+                          "block duration-150 relative group",
+                          pathname === item.href
+                            ? "font-medium text-primary"
+                            : "text-muted-foreground hover:text-accent-foreground"
+                        )}
                       >
                         <span>{item.name}</span>
+                        <span 
+                          className={cn(
+                            "absolute -bottom-1 left-0 h-0.5 bg-primary transform origin-left transition-all duration-300",
+                            pathname === item.href 
+                              ? "w-full"
+                              : "w-0 group-hover:w-full"
+                          )}
+                        />
                       </Link>
                     </li>
                   ))}
