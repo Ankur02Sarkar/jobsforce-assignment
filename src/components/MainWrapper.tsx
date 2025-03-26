@@ -1,9 +1,11 @@
 "use client";
+import { apiGet } from "@/lib/api";
+import { useLoading } from "@/lib/useLoading";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import React, { useEffect } from "react";
+import type React from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
-import { apiGet } from "@/lib/api";
 
 interface MainWrapperProps {
   children: React.ReactNode;
@@ -11,6 +13,9 @@ interface MainWrapperProps {
 
 export function MainWrapper({ children }: MainWrapperProps) {
   const { isLoaded, isSignedIn, user } = useUser();
+  const { withLoading } = useLoading({
+    onError: (error) => toast.error("An error occurred while loading data"),
+  });
 
   useEffect(() => {}, []);
 
@@ -24,9 +29,11 @@ export function MainWrapper({ children }: MainWrapperProps) {
 
   const getUserDetails = async (clerkId: string) => {
     try {
-      const data = await apiGet<{ data: { token: string; user: any } }>(
-        `/api/users/clerk/${clerkId}`
-      );
+      const data = await withLoading(async () => {
+        return await apiGet<{ data: { token: string; user: any } }>(
+          `/api/users/clerk/${clerkId}`,
+        );
+      });
       console.log("User details V2:", data);
       const { token, user } = data?.data || {};
 

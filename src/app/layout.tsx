@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Outfit, Poppins } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider, GoogleOneTap } from "@clerk/nextjs";
-import { HeroHeader } from "@/components/hero-header";
 import { MainWrapper } from "@/components/MainWrapper";
+import { HeroHeader } from "@/components/hero-header";
+import { Loader, LoaderStyles } from "@/components/ui/Loader";
+import { LoaderProvider } from "@/lib/LoaderContext";
+import { ClerkProvider, GoogleOneTap } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
@@ -93,10 +95,14 @@ export default function RootLayout({
         <body
           className={`${poppins.variable} ${outfit.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <GoogleOneTap />
-          <HeroHeader />
-          <Toaster position="top-center" reverseOrder={false} />
-          <MainWrapper>{children}</MainWrapper>
+          <LoaderStyles />
+          <LoaderProvider>
+            <GoogleOneTap />
+            <HeroHeader />
+            <Toaster position="top-center" reverseOrder={false} />
+            <Loader />
+            <MainWrapper>{children}</MainWrapper>
+          </LoaderProvider>
         </body>
       </html>
     </ClerkProvider>
