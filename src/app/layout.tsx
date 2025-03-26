@@ -93,7 +93,9 @@ export default function RootLayout({
         >
           <GoogleOneTap />
           <HeroHeader />
-          {children}
+          <main className="pt-24">
+            {children}
+          </main>
         </body>
       </html>
     </ClerkProvider>
