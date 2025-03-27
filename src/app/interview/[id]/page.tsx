@@ -32,6 +32,8 @@ interface Interview {
     question: string;
     answer?: string;
     score?: number;
+    questionId?: number;
+    timeTaken?: number;
   }>;
   feedback?: string;
   createdAt: string;
@@ -98,6 +100,13 @@ const getDifficultyColor = (difficulty: string) => {
     default:
       return "bg-gray-100 text-gray-800";
   }
+};
+
+// Helper function to format time in minutes and seconds
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
 const InterviewDetailPage = () => {
@@ -409,6 +418,11 @@ const InterviewDetailPage = () => {
                         Score: <span className="text-green-600">{question.score}/10</span>
                       </span>
                     )}
+                    {question.timeTaken !== undefined && (
+                      <span className="text-sm font-medium mr-3 text-gray-600">
+                        Time: <span className="text-blue-600">{formatTime(question.timeTaken)}</span>
+                      </span>
+                    )}
                     {expandedQuestions[index] ? 
                       <ChevronUp className="w-5 h-5 text-gray-500" /> : 
                       <ChevronDown className="w-5 h-5 text-gray-500" />
@@ -422,6 +436,11 @@ const InterviewDetailPage = () => {
                       <div className="mt-4">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="text-sm font-medium text-gray-700">Your Solution:</h4>
+                          {question.timeTaken && (
+                            <span className="text-xs font-medium text-gray-500">
+                              Completed in {formatTime(question.timeTaken)}
+                            </span>
+                          )}
                         </div>
                         <div className="border rounded overflow-hidden">
                           <CodeEditor

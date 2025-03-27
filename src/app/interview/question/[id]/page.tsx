@@ -884,6 +884,7 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
             answer?: string;
             score?: number;
             questionId?: number;  // Add questionId to track unique questions
+            timeTaken?: number;   // Add timeTaken to track completion time per question
           }>;
           [key: string]: any; // For other fields we don't need here
         };
@@ -897,12 +898,16 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       // Get existing questions or initialize empty array
       const existingQuestions = currentInterviewResponse.data.questions || [];
       
+      // Format completion time for display
+      const formattedTime = formatTime(completionTime);
+      
       // Create new question object
       const newQuestion = {
         question: question.title,
         answer: code,
         score: 10, // Assuming a perfect score for passing all test cases
-        questionId: question.id // Store the question ID to track duplicates
+        questionId: question.id, // Store the question ID to track duplicates
+        timeTaken: completionTime // Store the time taken to complete the question
       };
       
       // Check if this question already exists in the array
@@ -928,14 +933,16 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
         status: "completed",
         questions: updatedQuestions,
-        feedback: `Successfully completed ${question.title} in ${formatTime(completionTime)}.`
+        feedback: `Successfully completed ${question.title} in ${formattedTime}.`
       });
       
       console.log("Submission saved successfully:", response);
       
-      // Show a success message on next page
+      // Store interviewId and lastCompletedQuestion for next page
       if (typeof window !== 'undefined') {
         localStorage.setItem('lastCompletedQuestion', question.title);
+        // Make sure currentInterviewId is set for the return journey
+        localStorage.setItem('currentInterviewId', interviewId);
       }
     } catch (error) {
       console.error("Error saving submission to database:", error);
@@ -1321,16 +1328,47 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
             className="mt-6 flex justify-center space-x-4"
           >
             <button
-              onClick={() => router.push(`/interview/${params.id}`)}
+              onClick={() => {
+                // Get the interviewId from localStorage or URL params
+                let interviewId;
+                if (typeof window !== 'undefined') {
+                  interviewId = localStorage.getItem('currentInterviewId');
+                  if (!interviewId) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    interviewId = urlParams.get('interviewId');
+                  }
+                }
+                
+                // Navigate to the interview detail page using the correct ID
+                if (interviewId) {
+                  router.push(`/interview/${interviewId}`);
+                } else {
+                  // Fallback to interviews list if no ID found
+                  router.push('/interview');
+                }
+              }}
               className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
               Return to Challenges
             </button>
             {question && question.id < codingQuestions.length && (
               <button
-                onClick={() =>
-                  router.push(`/interview/question/${question.id + 1}`)
-                }
+                onClick={() => {
+                  // Get interviewId before navigating to next question
+                  let interviewId;
+                  if (typeof window !== 'undefined') {
+                    interviewId = localStorage.getItem('currentInterviewId');
+                    if (!interviewId) {
+                      const urlParams = new URLSearchParams(window.location.search);
+                      interviewId = urlParams.get('interviewId');
+                    }
+                    
+                    // Navigate to next question with interviewId
+                    router.push(`/interview/question/${question.id + 1}?interviewId=${interviewId}`);
+                  } else {
+                    router.push(`/interview/question/${question.id + 1}`);
+                  }
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
               >
                 Next Challenge
