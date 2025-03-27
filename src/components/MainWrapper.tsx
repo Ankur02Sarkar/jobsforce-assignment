@@ -20,8 +20,6 @@ export function MainWrapper({ children }: MainWrapperProps) {
   useEffect(() => {}, []);
 
   useEffect(() => {
-    console.log("clerk user : ", user);
-
     if (user?.id) {
       getUserDetails(user.id);
     }
@@ -34,7 +32,6 @@ export function MainWrapper({ children }: MainWrapperProps) {
           `/api/users/clerk/${clerkId}`,
         );
       });
-      console.log("User details V2:", data);
       const { token, user } = data?.data || {};
 
       if (user) {

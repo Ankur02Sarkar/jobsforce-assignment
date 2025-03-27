@@ -18,6 +18,7 @@ import JobDescription from "./JobDescription";
 import Image from "next/image";
 import CompanyLogo from "./CompanyLogo";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface JobModalProps {
   job: JobItem | null;
@@ -80,17 +81,13 @@ const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [jobDetails, setJobDetails] = useState<JobDetailsResponse | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    console.log("job : ", job);
     if (job.rest_id) {
       getCurrentJobInfo(job.rest_id);
     }
   }, [job]);
-
-  useEffect(() => {
-    console.log("jobDetails : ", jobDetails);
-  }, [jobDetails]);
 
   const getCurrentJobInfo = async (jobId: string) => {
     const payload = {
@@ -148,13 +145,12 @@ const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
     e.stopPropagation();
   };
 
-  useEffect(() => {
-    console.log("jobDescription : ", jobDescription);
-  }, [jobDescription]);
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="p-0 overflow-hidden w-full !max-w-[70vw]" hideClose={true}>
+      <DialogContent
+        className="p-0 overflow-hidden w-full !max-w-[70vw]"
+        hideClose={true}
+      >
         <div
           className="flex items-center justify-center bg-white rounded-xl p-6 w-full max-w-[70vw] overflow-y-auto"
           onClick={handleModalClick}
@@ -208,19 +204,36 @@ const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
                   )}
                 </div>
 
-                {externalUrl && (
-                  <Button
-                    onClick={() => {
-                      if (externalUrl) {
-                        window.open(externalUrl, "_blank");
-                      }
-                    }}
-                    disabled={!externalUrl}
-                    rel="noopener noreferrer"
-                    className="w-full max-w-md transform rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  >
-                    Apply Now
-                  </Button>
+                {!isLoading && (
+                  <div className="flex flex-row gap-3 items-center w-full justify-center">
+                    {externalUrl && (
+                      <Button
+                        onClick={() => {
+                          if (externalUrl) {
+                            window.open(externalUrl, "_blank");
+                          }
+                        }}
+                        disabled={!externalUrl}
+                        rel="noopener noreferrer"
+                        className="w-fit cursor-pointer max-w-md transform rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      >
+                        Apply Now
+                      </Button>
+                    )}
+
+                    <Button
+                      onClick={() => {
+                        if (job.rest_id) {
+                          router.push(`/interview/${job.rest_id}`);
+                        }
+                      }}
+                      disabled={!job.rest_id}
+                      rel="noopener noreferrer"
+                      className="w-fit cursor-pointer max-w-md transform rounded-lg bg-green-600 px-6 py-3 text-center font-semibold text-white transition-all hover:bg-green-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                      AI Interview
+                    </Button>
+                  </div>
                 )}
               </div>
 

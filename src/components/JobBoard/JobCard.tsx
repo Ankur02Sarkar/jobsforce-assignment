@@ -1,6 +1,7 @@
 
 import { formatDistanceToNow } from 'date-fns';
 import { MapPin, Briefcase, ExternalLink, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export interface JobItem {
   id: string;
@@ -46,6 +47,7 @@ interface JobCardProps {
 const JobCard = ({ job, onClick }: JobCardProps) => {
   const { core } = job.result;
   const company = job.result.company_profile_results?.result;
+  const router = useRouter();
   
   // Format posted date if available
   const formattedDate = core.posted_date 
@@ -75,7 +77,7 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
       className="job-card animate-scale-in" 
       onClick={onClick}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-center gap-4">
         {/* Company Logo */}
         <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center shadow-sm">
           {company?.logo?.normal_url ? (
@@ -133,10 +135,22 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
             e.stopPropagation();
             window.open(core.redirect_url, '_blank', 'noopener,noreferrer');
           }}
-          className="inline-flex items-center px-3 py-1.5 bg-blue-400/10 text-blue-500 text-sm font-medium rounded-md hover:bg-primary/20 transition-colors"
+          className="inline-flex items-center px-3 py-1.5 bg-blue-400/10 text-blue-500 text-sm font-medium rounded-md hover:bg-primary/20 transition-colors cursor-pointer"
         >
-          <ExternalLink size={14} className="mr-1" />
+          <ExternalLink size={14} className="mr-1 cursor-pointer" />
           Apply
+        </button>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (job.rest_id) {
+              router.push(`/interview/${job.rest_id}`);
+            }
+          }}
+          className="inline-flex items-center px-3 py-1.5 bg-green-400/10 text-green-500 text-sm font-medium rounded-md hover:bg-primary/20 transition-colors cursor-pointer"
+        >
+          <ExternalLink size={14} className="mr-1 cursor-pointer" />
+          AI Interview
         </button>
       </div>
     </div>

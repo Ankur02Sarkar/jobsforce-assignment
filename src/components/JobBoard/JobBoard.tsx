@@ -94,7 +94,6 @@ const JobBoard = () => {
     try {
       await withLoading(async () => {
         const response = await apiPost<JobsResponse>("/api/xjobs", payload);
-        console.log("Jobs API Response:", response?.data?.data?.job_search);
         setJobs(response?.data?.data?.job_search?.items_results);
         setJobsData(response);
         setHasSearched(true);

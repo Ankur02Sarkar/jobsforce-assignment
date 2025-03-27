@@ -1,6 +1,6 @@
-
-import { useState } from 'react';
-import { Search, MapPin, Briefcase } from 'lucide-react';
+import { useState } from "react";
+import { Search, MapPin, Briefcase } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface JobSearchFormProps {
   onSearch: (keyword: string, location: string, count: number) => void;
@@ -14,18 +14,31 @@ const JobSearchForm = ({ onSearch, isLoading }: JobSearchFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (keyword.trim() === "") {
+      toast.error("Please enter a keyword");
+      return;
+    }
+    if (location.trim() === "") {
+      toast.error("Please enter a location");
+      return;
+    }
     onSearch(keyword, location, count);
   };
 
   return (
     <div className="glass-morphism rounded-2xl p-6 mb-8 animate-fade-in">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Find Your Dream Job</h2>
-      
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+        Find Your Dream Job
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Keyword Input */}
           <div className="space-y-2">
-            <label htmlFor="keyword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="keyword"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Job Title / Keyword
             </label>
             <div className="relative">
@@ -39,10 +52,13 @@ const JobSearchForm = ({ onSearch, isLoading }: JobSearchFormProps) => {
               />
             </div>
           </div>
-          
+
           {/* Location Input */}
           <div className="space-y-2">
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Location
             </label>
             <div className="relative">
@@ -56,10 +72,13 @@ const JobSearchForm = ({ onSearch, isLoading }: JobSearchFormProps) => {
               />
             </div>
           </div>
-          
+
           {/* Count Dropdown */}
           <div className="space-y-2">
-            <label htmlFor="count" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="count"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Results Per Page
             </label>
             <select
@@ -76,12 +95,12 @@ const JobSearchForm = ({ onSearch, isLoading }: JobSearchFormProps) => {
             </select>
           </div>
         </div>
-        
+
         <div className="flex justify-center md:justify-end">
           <button
             type="submit"
             disabled={isLoading}
-            className="primary-button flex items-center justify-center gap-2 min-w-[140px]"
+            className="primary-button flex items-center justify-center gap-2 min-w-[140px] cursor-pointer"
             aria-label="Search for jobs"
           >
             {isLoading ? (
@@ -89,7 +108,7 @@ const JobSearchForm = ({ onSearch, isLoading }: JobSearchFormProps) => {
             ) : (
               <>
                 <Search size={18} />
-                <span>Search Jobs</span>
+                <span className="cursor-pointer">Search Jobs</span>
               </>
             )}
           </button>
