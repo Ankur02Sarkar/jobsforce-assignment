@@ -63,11 +63,22 @@ export const createJudge0Client = (baseURL: string = 'https://judge0-ce.p.rapida
     },
   });
   
-  // Helper function to decode base64 responses
-  const decodeBase64 = (str: string | null): string | null => {
+  // Helper function to encode string to base64
+  const encode = (str: string | null): string | null => {
     if (!str) return null;
     try {
-      return atob(str);
+      return Buffer.from(str, "binary").toString("base64");
+    } catch (e) {
+      console.error('Failed to encode string to base64:', e);
+      return str;
+    }
+  };
+  
+  // Helper function to decode base64 responses
+  const decode = (str: string | null): string | null => {
+    if (!str) return null;
+    try {
+      return Buffer.from(str, 'base64').toString();
     } catch (e) {
       console.error('Failed to decode base64 string:', e);
       return str;
@@ -94,10 +105,10 @@ export const createJudge0Client = (baseURL: string = 'https://judge0-ce.p.rapida
       if (useBase64) {
         return {
           ...data,
-          stdout: decodeBase64(data.stdout),
-          stderr: decodeBase64(data.stderr),
-          compile_output: decodeBase64(data.compile_output),
-          message: decodeBase64(data.message)
+          stdout: decode(data.stdout),
+          stderr: decode(data.stderr),
+          compile_output: decode(data.compile_output),
+          message: decode(data.message)
         };
       }
       
@@ -126,10 +137,10 @@ export const createJudge0Client = (baseURL: string = 'https://judge0-ce.p.rapida
         if (useBase64) {
           return {
             ...data,
-            stdout: decodeBase64(data.stdout),
-            stderr: decodeBase64(data.stderr),
-            compile_output: decodeBase64(data.compile_output),
-            message: decodeBase64(data.message)
+            stdout: decode(data.stdout),
+            stderr: decode(data.stderr),
+            compile_output: decode(data.compile_output),
+            message: decode(data.message)
           };
         }
         
@@ -155,13 +166,17 @@ export const createJudge0Client = (baseURL: string = 'https://judge0-ce.p.rapida
         throw new Error(`Unsupported language: ${languageValue}`);
       }
 
+      // Encode code and input if using base64
+      const encodedSourceCode = useBase64 ? encode(sourceCode) : sourceCode;
+      const encodedStdin = stdin && useBase64 ? encode(stdin) : stdin;
+
       const submission: SubmissionRequest = {
-        source_code: sourceCode,
+        source_code: encodedSourceCode as string,
         language_id: languageId,
       };
 
-      if (stdin) {
-        submission.stdin = stdin;
+      if (encodedStdin) {
+        submission.stdin = encodedStdin;
       }
 
       try {
@@ -181,10 +196,10 @@ export const createJudge0Client = (baseURL: string = 'https://judge0-ce.p.rapida
         if (useBase64) {
           return {
             ...data,
-            stdout: decodeBase64(data.stdout),
-            stderr: decodeBase64(data.stderr),
-            compile_output: decodeBase64(data.compile_output),
-            message: decodeBase64(data.message)
+            stdout: decode(data.stdout),
+            stderr: decode(data.stderr),
+            compile_output: decode(data.compile_output),
+            message: decode(data.message)
           };
         }
         
