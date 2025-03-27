@@ -154,7 +154,7 @@ const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="p-0 overflow-hidden w-full !max-w-[70vw]">
+      <DialogContent className="p-0 overflow-hidden w-full !max-w-[70vw]" hideClose={true}>
         <div
           className="flex items-center justify-center bg-white rounded-xl p-6 w-full max-w-[70vw] overflow-y-auto"
           onClick={handleModalClick}
