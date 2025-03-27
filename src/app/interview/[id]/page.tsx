@@ -11,35 +11,40 @@ const codingQuestions = [
     id: 1,
     title: "Two Sum",
     difficulty: "Easy",
-    description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+    description:
+      "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
     tags: ["Array", "Hash Table"],
   },
   {
     id: 2,
     title: "Valid Parentheses",
     difficulty: "Easy",
-    description: "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+    description:
+      "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
     tags: ["Stack", "String"],
   },
   {
     id: 3,
     title: "Merge Two Sorted Lists",
     difficulty: "Easy",
-    description: "Merge two sorted linked lists and return it as a sorted list.",
+    description:
+      "Merge two sorted linked lists and return it as a sorted list.",
     tags: ["Linked List", "Recursion"],
   },
   {
     id: 4,
     title: "Maximum Subarray",
     difficulty: "Medium",
-    description: "Find the contiguous subarray within an array (containing at least one number) which has the largest sum.",
+    description:
+      "Find the contiguous subarray within an array (containing at least one number) which has the largest sum.",
     tags: ["Array", "Dynamic Programming"],
   },
   {
     id: 5,
     title: "Longest Palindromic Substring",
     difficulty: "Medium",
-    description: "Given a string s, return the longest palindromic substring in s.",
+    description:
+      "Given a string s, return the longest palindromic substring in s.",
     tags: ["String", "Dynamic Programming"],
   },
 ];
@@ -83,7 +88,9 @@ const JobInterview = () => {
             <Link href={`/interview/question/${question.id}`}>
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${getDifficultyColor(question.difficulty)}`}>
+                  <span
+                    className={`text-xs font-medium px-2 py-1 rounded-full ${getDifficultyColor(question.difficulty)}`}
+                  >
                     {question.difficulty}
                   </span>
                   <div className="flex items-center text-gray-500 dark:text-gray-400">

@@ -72,7 +72,7 @@ const JobBoard = () => {
   const handleSearch = async (
     keyword: string,
     location: string,
-    count: number
+    count: number,
   ) => {
     setKeyword(keyword);
     setLocation(location);
@@ -282,7 +282,7 @@ const JobBoard = () => {
             No jobs found
           </h3>
           <p className="mt-2 text-gray-500 max-w-md mx-auto">
-            We couldn't find any jobs matching your search criteria. Try
+            We couldn&apos;t find any jobs matching your search criteria. Try
             adjusting your filters or search terms.
           </p>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { JobItem } from "./JobCard";
+import type { JobItem } from "./JobCard";
 import {
   Briefcase,
   MapPin,
@@ -74,17 +74,12 @@ interface JobDetailsResponse {
 }
 
 const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
-  if (!job) return null;
-
-  const { core } = job.result;
-  // const company = job.result.company_profile_results?.result;
-
   const [isLoading, setIsLoading] = useState(false);
   const [jobDetails, setJobDetails] = useState<JobDetailsResponse | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    if (job.rest_id) {
+    if (job?.rest_id) {
       getCurrentJobInfo(job.rest_id);
     }
   }, [job]);
@@ -99,7 +94,7 @@ const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
       setIsLoading(true);
       const response = await apiPost<JobDetailsResponse>(
         "/api/xjobs/details",
-        payload
+        payload,
       );
       setJobDetails(response);
       return response.data.data;
@@ -111,6 +106,11 @@ const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
       setIsLoading(false);
     }
   };
+
+  if (!job) return null;
+
+  const { core } = job.result;
+  // const company = job.result.company_profile_results?.result;
 
   // Format posted date
   const formattedDate = core.posted_date

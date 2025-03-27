@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React, { type JSX } from "react";
 
 interface Block {
   text: string;
@@ -135,8 +135,8 @@ const JobDescription: React.FC<JobDescriptionProps> = ({ description }) => {
                 key: `list-${result.length}`,
                 className: "list-disc space-y-2 mb-4",
               },
-              currentListItems
-            )
+              currentListItems,
+            ),
           );
           currentListItems = [];
         }
@@ -155,8 +155,8 @@ const JobDescription: React.FC<JobDescriptionProps> = ({ description }) => {
                 key: `list-${result.length}`,
                 className: "list-disc space-y-2 mb-4",
               },
-              currentListItems
-            )
+              currentListItems,
+            ),
           );
           currentListItems = [];
           currentListType = null;
@@ -176,8 +176,8 @@ const JobDescription: React.FC<JobDescriptionProps> = ({ description }) => {
             key: `list-${result.length}`,
             className: "list-disc space-y-2 mb-4",
           },
-          currentListItems
-        )
+          currentListItems,
+        ),
       );
     }
 

@@ -1,7 +1,6 @@
-
-import { formatDistanceToNow } from 'date-fns';
-import { MapPin, Briefcase, ExternalLink, Clock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { formatDistanceToNow } from "date-fns";
+import { MapPin, Briefcase, ExternalLink, Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export interface JobItem {
   id: string;
@@ -48,48 +47,45 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
   const { core } = job.result;
   const company = job.result.company_profile_results?.result;
   const router = useRouter();
-  
+
   // Format posted date if available
-  const formattedDate = core.posted_date 
+  const formattedDate = core.posted_date
     ? formatDistanceToNow(new Date(core.posted_date), { addSuffix: true })
-    : 'Recently';
-  
+    : "Recently";
+
   // Determine job type badge color
   const getJobTypeBadgeClass = () => {
-    if (!core.job_type) return 'badge-blue';
-    
+    if (!core.job_type) return "badge-blue";
+
     switch (core.job_type.toLowerCase()) {
-      case 'full-time':
-        return 'badge-blue';
-      case 'part-time':
-        return 'badge-green';
-      case 'contract':
-        return 'badge-amber';
-      case 'remote':
-        return 'badge-purple';
+      case "full-time":
+        return "badge-blue";
+      case "part-time":
+        return "badge-green";
+      case "contract":
+        return "badge-amber";
+      case "remote":
+        return "badge-purple";
       default:
-        return 'badge-blue';
+        return "badge-blue";
     }
   };
 
   return (
-    <div 
-      className="job-card animate-scale-in" 
-      onClick={onClick}
-    >
+    <div className="job-card animate-scale-in" onClick={onClick}>
       <div className="flex items-center gap-4">
         {/* Company Logo */}
         <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center shadow-sm">
           {company?.logo?.normal_url ? (
-            <img 
-              src={company.logo.normal_url} 
+            <img
+              src={company.logo.normal_url}
               alt={`${company.core.name} logo`}
               className="w-full h-full object-contain"
               loading="lazy"
             />
           ) : (
             <div className="text-xl font-bold text-gray-400">
-              {company?.core?.name?.charAt(0) || '?'}
+              {company?.core?.name?.charAt(0) || "?"}
             </div>
           )}
         </div>
@@ -98,28 +94,28 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className={`${getJobTypeBadgeClass()}`}>
-              {core.job_type || 'Full-time'}
+              {core.job_type || "Full-time"}
             </span>
             <span className="text-xs text-gray-500 flex items-center">
               <Clock size={12} className="mr-1" />
               {formattedDate}
             </span>
           </div>
-          
+
           <h3 className="text-lg font-semibold text-primary truncate">
             {core.title}
           </h3>
-          
+
           <p className="text-sm font-medium text-gray-800 mt-1">
             {company?.core?.name}
           </p>
-          
+
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-2">
             <div className="flex items-center text-sm text-gray-600">
               <MapPin size={14} className="mr-1 flex-shrink-0" />
               <span className="truncate">{core.location}</span>
             </div>
-            
+
             {core.salary_range && (
               <div className="flex items-center text-sm text-gray-600">
                 <span className="hidden sm:inline mx-2 text-gray-300">•</span>
@@ -130,17 +126,17 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
         </div>
 
         {/* View Button */}
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
-            window.open(core.redirect_url, '_blank', 'noopener,noreferrer');
+            window.open(core.redirect_url, "_blank", "noopener,noreferrer");
           }}
           className="inline-flex items-center px-3 py-1.5 bg-blue-400/10 text-blue-500 text-sm font-medium rounded-md hover:bg-primary/20 transition-colors cursor-pointer"
         >
           <ExternalLink size={14} className="mr-1 cursor-pointer" />
           Apply
         </button>
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             if (job.rest_id) {
