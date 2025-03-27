@@ -106,7 +106,7 @@ export const createJudge0Client = (
       useBase64 = false,
     ): Promise<SubmissionResult> => {
       const response = await apiClient.get(
-        `/submissions/${token}?base64_encoded=${useBase64}&fields=stdout,stderr,status_id,status,compile_output,message,time,memory`,
+        `/submissions/${token}?base64_encoded=${useBase64}&fields=*`,
       );
       const data = response.data;
 
@@ -139,7 +139,7 @@ export const createJudge0Client = (
       const poll = async (): Promise<SubmissionResult> => {
         attempts++;
         const result = await apiClient.get(
-          `/submissions/${token}?base64_encoded=${useBase64}&fields=stdout,stderr,status_id,status,compile_output,message,time,memory`,
+          `/submissions/${token}?base64_encoded=${useBase64}&fields=*`,
         );
         const data = result.data;
 
@@ -208,7 +208,7 @@ export const createJudge0Client = (
 
         // Get the result
         const result = await apiClient.get(
-          `/submissions/${token}?base64_encoded=${useBase64}&fields=stdout,stderr,status_id,status,compile_output,message,time,memory`,
+          `/submissions/${token}?base64_encoded=${useBase64}&fields=*`,
         );
         const data = result.data;
 
