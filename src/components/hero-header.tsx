@@ -10,9 +10,9 @@ import { Logo } from "./logo";
 
 const menuItems = [
   { name: "Dashboard", href: "/dashboard" },
-  { name: "Profile", href: "/profile" },
-  { name: "AI Interview", href: "/interview" },
   { name: "JobBoard", href: "/jobboard" },
+  { name: "AI Interview", href: "/interview" },
+  { name: "Profile", href: "/profile" },
 ];
 
 export const HeroHeader = () => {

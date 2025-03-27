@@ -29,9 +29,6 @@ const JobSearchForm = ({ onSearch, isLoading }: JobSearchFormProps) => {
               Job Title / Keyword
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                <Briefcase size={18} />
-              </div>
               <input
                 id="keyword"
                 type="text"
@@ -49,9 +46,6 @@ const JobSearchForm = ({ onSearch, isLoading }: JobSearchFormProps) => {
               Location
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                <MapPin size={18} />
-              </div>
               <input
                 id="location"
                 type="text"
