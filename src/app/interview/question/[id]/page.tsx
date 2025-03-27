@@ -861,7 +861,7 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       }
       
       // If interviewId is not in localStorage, check URL search params
-      if (!interviewId) {
+      if (!interviewId && typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
         interviewId = urlParams.get('interviewId');
       }
@@ -907,6 +907,7 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       const updatedQuestions = [...existingQuestions, newQuestion];
       
       // Call the API to update the interview record
+      // Also update the status to "completed" since the user has successfully completed a question
       const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
         status: "completed",
         questions: updatedQuestions,
@@ -914,6 +915,11 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       });
       
       console.log("Submission saved successfully:", response);
+      
+      // Show a success message on next page
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('lastCompletedQuestion', question.title);
+      }
     } catch (error) {
       console.error("Error saving submission to database:", error);
       // Don't show an error to the user here since the submission was technically successful

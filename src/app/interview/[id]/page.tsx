@@ -11,7 +11,9 @@ import {
   ClockIcon, 
   Code,
   ExternalLink,
-  PlayCircle
+  PlayCircle,
+  CheckSquare,
+  XSquare
 } from "lucide-react";
 
 // Interview type definition based on backend model
@@ -19,7 +21,7 @@ interface Interview {
   _id: string;
   title: string;
   date: string;
-  status: "scheduled" | "pending" | "completed";
+  status: "scheduled" | "pending" | "completed" | "cancelled";
   duration: number;
   questions?: Array<{
     question: string;
@@ -98,6 +100,7 @@ const InterviewDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [updating, setUpdating] = useState(false);
   const router = useRouter();
   const params = useParams();
   const interviewId = params.id as string;
@@ -162,6 +165,52 @@ const InterviewDetailPage = () => {
     router.push(`/interview/question/${questionId}?interviewId=${interviewId}`);
   };
 
+  // Function to finish the test (mark as completed)
+  const finishTest = async () => {
+    try {
+      setUpdating(true);
+      const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
+        status: "completed"
+      });
+      
+      if (response.success) {
+        setInterview(response.data);
+      } else {
+        setError("Failed to update interview status");
+      }
+    } catch (error) {
+      console.error("Failed to finish test:", error);
+      setError("Failed to update interview status");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Function to end the test (mark as cancelled)
+  const endTest = async () => {
+    try {
+      if (!confirm("Are you sure you want to cancel this interview? This action cannot be undone.")) {
+        return;
+      }
+      
+      setUpdating(true);
+      const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
+        status: "cancelled"
+      });
+      
+      if (response.success) {
+        setInterview(response.data);
+      } else {
+        setError("Failed to update interview status");
+      }
+    } catch (error) {
+      console.error("Failed to end test:", error);
+      setError("Failed to update interview status");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -189,17 +238,51 @@ const InterviewDetailPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <Link href="/interview" className="flex items-center text-blue-600 mb-6">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Interviews
-      </Link>
+      <div className="flex justify-between items-center mb-6">
+        <Link href="/interview" className="flex items-center text-blue-600">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Interviews
+        </Link>
+        
+        {/* Add status control buttons */}
+        {interview && interview.status !== "completed" && interview.status !== "cancelled" && (
+          <div className="flex space-x-3">
+            <button
+              onClick={finishTest}
+              disabled={updating}
+              className="flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+            >
+              <CheckSquare className="w-4 h-4 mr-2" />
+              Finish Test
+            </button>
+            <button
+              onClick={endTest}
+              disabled={updating}
+              className="flex items-center bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+            >
+              <XSquare className="w-4 h-4 mr-2" />
+              End Test
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="mb-10">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              {interview.title}
-            </h1>
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                {interview?.title}
+              </h1>
+              <span className={`ml-3 text-sm font-medium px-2.5 py-0.5 rounded-full ${
+                interview?.status === "completed" ? "bg-green-100 text-green-800" :
+                interview?.status === "scheduled" ? "bg-blue-100 text-blue-800" :
+                interview?.status === "cancelled" ? "bg-red-100 text-red-800" :
+                "bg-yellow-100 text-yellow-800"
+              }`}>
+                {interview?.status.charAt(0).toUpperCase() + interview?.status.slice(1)}
+              </span>
+            </div>
             <p className="text-gray-600 mt-2">
               Complete the following coding challenges to showcase your skills
             </p>
@@ -208,74 +291,84 @@ const InterviewDetailPage = () => {
             <div className="flex items-center mb-2 justify-end">
               <CalendarIcon className="w-4 h-4 mr-2 text-gray-500" />
               <span className="text-sm text-gray-600">
-                {new Date(interview.date).toLocaleDateString()}
+                {interview && new Date(interview.date).toLocaleDateString()}
               </span>
             </div>
             <div className="flex items-center justify-end">
               <ClockIcon className="w-4 h-4 mr-2 text-gray-500" />
               <span className="text-sm text-gray-600">
-                {interview.duration} minutes
+                {interview?.duration} minutes
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {codingQuestions.map((question) => (
-          <motion.div
-            key={question.id}
-            className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all"
-            whileHover={{ y: -5 }}
-            onClick={() => navigateToQuestion(question.id)}
-            onHoverStart={() => setHoveredId(question.id)}
-            onHoverEnd={() => setHoveredId(null)}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <span
-                  className={`text-xs font-medium px-2 py-1 rounded-full ${getDifficultyColor(question.difficulty)}`}
-                >
-                  {question.difficulty}
-                </span>
-                <div className="flex items-center text-gray-500 dark:text-gray-400">
-                  <ClockIcon className="w-4 h-4 mr-1" />
-                  <span className="text-xs">30 min</span>
+      {/* Display "Interview Cancelled" message if status is cancelled */}
+      {interview?.status === "cancelled" && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+          This interview has been cancelled.
+        </div>
+      )}
+
+      {/* Only show coding questions if the interview is not cancelled */}
+      {interview?.status !== "cancelled" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {codingQuestions.map((question) => (
+            <motion.div
+              key={question.id}
+              className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all"
+              whileHover={{ y: -5 }}
+              onClick={() => navigateToQuestion(question.id)}
+              onHoverStart={() => setHoveredId(question.id)}
+              onHoverEnd={() => setHoveredId(null)}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span
+                    className={`text-xs font-medium px-2 py-1 rounded-full ${getDifficultyColor(question.difficulty)}`}
+                  >
+                    {question.difficulty}
+                  </span>
+                  <div className="flex items-center text-gray-500 dark:text-gray-400">
+                    <ClockIcon className="w-4 h-4 mr-1" />
+                    <span className="text-xs">30 min</span>
+                  </div>
+                </div>
+                <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white flex items-center">
+                  {question.title}
+                  {hoveredId === question.id && (
+                    <ExternalLink className="ml-2 w-4 h-4 text-blue-500" />
+                  )}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
+                  {question.description}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {question.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
-              <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white flex items-center">
-                {question.title}
-                {hoveredId === question.id && (
-                  <ExternalLink className="ml-2 w-4 h-4 text-blue-500" />
-                )}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
-                {question.description}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {question.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded"
-                  >
-                    {tag}
+              <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 px-6 py-3 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Code className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Start Coding
                   </span>
-                ))}
+                </div>
               </div>
-            </div>
-            <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center">
-                <Code className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Start Coding
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
-      {interview.status === "completed" && interview.questions && interview.questions.length > 0 && (
+      {interview?.status === "completed" && interview.questions && interview.questions.length > 0 && (
         <div className="mt-12 bg-white rounded-lg shadow-md border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4">Your Interview Results</h2>
           
