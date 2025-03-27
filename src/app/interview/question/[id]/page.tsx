@@ -883,6 +883,7 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
             question: string;
             answer?: string;
             score?: number;
+            questionId?: number;  // Add questionId to track unique questions
           }>;
           [key: string]: any; // For other fields we don't need here
         };
@@ -900,11 +901,27 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       const newQuestion = {
         question: question.title,
         answer: code,
-        score: 10 // Assuming a perfect score for passing all test cases
+        score: 10, // Assuming a perfect score for passing all test cases
+        questionId: question.id // Store the question ID to track duplicates
       };
       
-      // Append the new question to existing questions
-      const updatedQuestions = [...existingQuestions, newQuestion];
+      // Check if this question already exists in the array
+      const questionIndex = existingQuestions.findIndex(q => 
+        q.questionId === question.id || q.question === question.title
+      );
+      
+      let updatedQuestions;
+      
+      if (questionIndex >= 0) {
+        // Question already exists, update it
+        console.log(`Question "${question.title}" already exists, updating it`);
+        updatedQuestions = [...existingQuestions];
+        updatedQuestions[questionIndex] = newQuestion;
+      } else {
+        // Question doesn't exist, append it
+        console.log(`Adding new question "${question.title}"`);
+        updatedQuestions = [...existingQuestions, newQuestion];
+      }
       
       // Call the API to update the interview record
       // Also update the status to "completed" since the user has successfully completed a question

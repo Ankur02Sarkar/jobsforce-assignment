@@ -11,6 +11,7 @@ type CodeEditorProps = {
   placeholder?: string;
   className?: string;
   style?: React.CSSProperties;
+  readOnly?: boolean;
 };
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -20,6 +21,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   placeholder = "Enter your code here...",
   className = "",
   style = {},
+  readOnly = false,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false);
   
@@ -64,6 +66,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           scrollbar: {
             useShadows: false,
           },
+          readOnly: readOnly,
         }}
       />
       

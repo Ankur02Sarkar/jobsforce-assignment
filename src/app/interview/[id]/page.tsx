@@ -13,8 +13,13 @@ import {
   ExternalLink,
   PlayCircle,
   CheckSquare,
-  XSquare
+  XSquare,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  EyeOff
 } from "lucide-react";
+import CodeEditor from "@/components/ui/code-editor";
 
 // Interview type definition based on backend model
 interface Interview {
@@ -101,6 +106,7 @@ const InterviewDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [expandedQuestions, setExpandedQuestions] = useState<{[key: number]: boolean}>({});
   const router = useRouter();
   const params = useParams();
   const interviewId = params.id as string;
@@ -209,6 +215,23 @@ const InterviewDetailPage = () => {
     } finally {
       setUpdating(false);
     }
+  };
+
+  // Function to toggle question expansion
+  const toggleQuestion = (index: number) => {
+    setExpandedQuestions(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  // Function to determine the language from code
+  const determineLanguage = (code: string): string => {
+    if (code.includes('function') && code.includes(';')) return 'javascript';
+    if (code.includes('def ') && code.includes(':')) return 'python';
+    if (code.includes('class') && code.includes('{')) return 'java';
+    if (code.includes('#include')) return 'cpp';
+    return 'javascript'; // Default
   };
 
   if (loading) {
@@ -374,21 +397,47 @@ const InterviewDetailPage = () => {
           
           <div className="space-y-6">
             {interview.questions.map((question, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-md">
-                <h3 className="font-medium mb-2">Question {index + 1}</h3>
-                <p className="text-gray-800 mb-3">{question.question}</p>
-                
-                {question.answer && (
-                  <div className="mt-2">
-                    <h4 className="text-sm font-medium text-gray-600 mb-1">Your Answer:</h4>
-                    <p className="text-gray-800">{question.answer}</p>
+              <div key={index} className="bg-gray-50 rounded-md overflow-hidden">
+                <div 
+                  className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                  onClick={() => toggleQuestion(index)}
+                >
+                  <h3 className="font-medium">Question {index + 1}: {question.question}</h3>
+                  <div className="flex items-center">
+                    {question.score !== undefined && (
+                      <span className="text-sm font-medium mr-3 text-gray-600">
+                        Score: <span className="text-green-600">{question.score}/10</span>
+                      </span>
+                    )}
+                    {expandedQuestions[index] ? 
+                      <ChevronUp className="w-5 h-5 text-gray-500" /> : 
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    }
                   </div>
-                )}
+                </div>
                 
-                {question.score !== undefined && (
-                  <div className="mt-3 flex items-center">
-                    <span className="text-sm font-medium text-gray-600 mr-2">Score:</span>
-                    <span className="text-gray-800">{question.score}/10</span>
+                {expandedQuestions[index] && (
+                  <div className="p-4 pt-0 border-t border-gray-200">
+                    {question.answer ? (
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-medium text-gray-700">Your Solution:</h4>
+                        </div>
+                        <div className="border rounded overflow-hidden">
+                          <CodeEditor
+                            value={question.answer}
+                            onChange={() => {}}
+                            language={determineLanguage(question.answer)}
+                            placeholder=""
+                            className="w-full h-full"
+                            style={{ height: '250px' }}
+                            readOnly={true}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic mt-2">No answer provided</p>
+                    )}
                   </div>
                 )}
               </div>
