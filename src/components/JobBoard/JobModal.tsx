@@ -1,8 +1,23 @@
-
+"use client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { JobItem } from "./JobCard";
-import { Briefcase, MapPin, CalendarDays, Building, ExternalLink } from "lucide-react";
+import {
+  Briefcase,
+  MapPin,
+  CalendarDays,
+  Building,
+  ExternalLink,
+  X,
+} from "lucide-react";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import { apiPost } from "@/lib/api";
+import { AnimatePresence, motion } from "motion/react";
+import { Button } from "../ui/button";
+import JobDescription from "./JobDescription";
+import Image from "next/image";
+import CompanyLogo from "./CompanyLogo";
+import toast from "react-hot-toast";
 
 interface JobModalProps {
   job: JobItem | null;
@@ -10,128 +25,219 @@ interface JobModalProps {
   onClose: () => void;
 }
 
+interface JobDetailsResponse {
+  data: {
+    data: {
+      jobData: {
+        id: string;
+        rest_id: string;
+        result: {
+          __typename: string;
+          id: string;
+          core: {
+            title: string;
+            external_url: string;
+            featured: number;
+            job_description: string;
+            job_page_url: string;
+            location: string;
+          };
+          company_profile_results: {
+            id: string;
+            rest_id: string;
+            result: {
+              __typename: string;
+              id: string;
+              rest_id: string;
+              core: {
+                name: string;
+              };
+              logo: {
+                normal_url: string;
+              };
+            };
+          };
+        };
+      };
+      viewer: {
+        user_results: {
+          result: {
+            __typename: string;
+            id: string;
+          };
+          id: string;
+        };
+      };
+    };
+  };
+}
+
 const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
   if (!job) return null;
-  
+
   const { core } = job.result;
-  const company = job.result.company_profile_results?.result;
-  
+  // const company = job.result.company_profile_results?.result;
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [jobDetails, setJobDetails] = useState<JobDetailsResponse | null>(null);
+
+  useEffect(() => {
+    console.log("job : ", job);
+    if (job.rest_id) {
+      getCurrentJobInfo(job.rest_id);
+    }
+  }, [job]);
+
+  useEffect(() => {
+    console.log("jobDetails : ", jobDetails);
+  }, [jobDetails]);
+
+  const getCurrentJobInfo = async (jobId: string) => {
+    const payload = {
+      jobId: jobId,
+      loggedIn: true,
+    };
+
+    try {
+      setIsLoading(true);
+      const response = await apiPost<JobDetailsResponse>(
+        "/api/xjobs/details",
+        payload
+      );
+      setJobDetails(response);
+      return response.data.data;
+    } catch (error: unknown) {
+      console.error("Error fetching job details:", error);
+      toast.error("Failed to fetch job details. Please try again.");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Format posted date
-  const formattedDate = core.posted_date 
-    ? format(new Date(core.posted_date), 'MMM d, yyyy')
-    : 'Recently posted';
-  
+  const formattedDate = core.posted_date
+    ? format(new Date(core.posted_date), "MMM d, yyyy")
+    : "Recently posted";
+
+  const title = jobDetails?.data?.data?.jobData?.result?.core?.title ?? "";
+  const company =
+    jobDetails?.data?.data?.jobData?.result?.company_profile_results?.result
+      ?.core?.name ?? "";
+  const location =
+    jobDetails?.data?.data?.jobData?.result?.core?.location ?? "";
+  const externalUrl =
+    jobDetails?.data?.data?.jobData?.result?.core?.external_url ?? "";
+  const logoUrl =
+    jobDetails?.data?.data?.jobData?.result?.company_profile_results?.result
+      ?.logo?.normal_url ?? "";
+  const jobDescription =
+    jobDetails?.data?.data?.jobData?.result?.core?.job_description ?? "";
+
+  const logoColors = [
+    "#F87171",
+    "#60A5FA",
+    "#34D399",
+    "#A78BFA",
+    "#FBBF24",
+    "#EC4899",
+  ];
+  const logoColor = logoColors[Math.floor(Math.random() * logoColors.length)];
+
+  const handleModalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  useEffect(() => {
+    console.log("jobDescription : ", jobDescription);
+  }, [jobDescription]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden">
-        <div className="max-h-[85vh] overflow-y-auto">
-          {/* Header section with gradient background */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b">
-            <div className="flex items-center gap-4 mb-4">
-              {/* Company Logo */}
-              <div className="flex-shrink-0 w-14 h-14 bg-white rounded-lg overflow-hidden flex items-center justify-center shadow-sm border border-gray-100">
-                {company?.logo?.normal_url ? (
-                  <img 
-                    src={company.logo.normal_url} 
-                    alt={`${company.core.name} logo`}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <div className="text-2xl font-bold text-gray-400">
-                    {company?.core?.name?.charAt(0) || '?'}
-                  </div>
+      <DialogContent className="p-0 overflow-hidden w-full !max-w-[70vw]">
+        <div
+          className="flex items-center justify-center bg-white rounded-xl p-6 w-full max-w-[70vw] overflow-y-auto"
+          onClick={handleModalClick}
+        >
+          <div className="w-full">
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={onClose}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 max-h-[80vh] overflow-y-scroll">
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-6">
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      width={80}
+                      height={80}
+                      alt={company}
+                      className="rounded-full object-cover"
+                    />
+                  ) : (
+                    <CompanyLogo
+                      company={company}
+                      size="lg"
+                      color={logoColor}
+                    />
+                  )}
+                </div>
+
+                <h1 className="mb-4 text-3xl font-bold text-gray-900">
+                  {title}
+                </h1>
+
+                <div className="mb-6 flex flex-wrap items-center justify-center gap-4 text-gray-600">
+                  {company && (
+                    <div className="flex items-center">
+                      <Building className="mr-2" size={20} />
+                      <span className="font-medium">{company}</span>
+                    </div>
+                  )}
+                  {location && (
+                    <div className="flex items-center">
+                      <MapPin className="mr-2" size={20} />
+                      <span className="font-medium">{location}</span>
+                    </div>
+                  )}
+                </div>
+
+                {externalUrl && (
+                  <Button
+                    onClick={() => {
+                      if (externalUrl) {
+                        window.open(externalUrl, "_blank");
+                      }
+                    }}
+                    disabled={!externalUrl}
+                    rel="noopener noreferrer"
+                    className="w-full max-w-md transform rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Apply Now
+                  </Button>
                 )}
               </div>
-              
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{core.title}</h2>
-                <p className="text-gray-700 flex items-center mt-1">
-                  <Building size={16} className="mr-1.5" />
-                  {company?.core?.name}
-                </p>
+
+              <div className="mt-8 border-t pt-6">
+                <h2 className="mb-4 text-xl font-bold text-gray-900">
+                  Job Description
+                </h2>
+                {isLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-4 w-3/4 rounded bg-gray-200"></div>
+                    <div className="h-4 rounded bg-gray-200"></div>
+                    <div className="h-4 w-5/6 rounded bg-gray-200"></div>
+                  </div>
+                ) : (
+                  <JobDescription description={jobDescription} />
+                )}
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-              <div className="flex items-start">
-                <MapPin size={18} className="mr-2 text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Location</p>
-                  <p className="text-sm text-gray-600">{core.location}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Briefcase size={18} className="mr-2 text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Job Type</p>
-                  <p className="text-sm text-gray-600">{core.job_type || 'Full-time'}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <CalendarDays size={18} className="mr-2 text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Posted On</p>
-                  <p className="text-sm text-gray-600">{formattedDate}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Job details section */}
-          <div className="p-6">
-            {/* Salary information */}
-            {core.salary_range && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">Salary Range</h3>
-                <p className="text-gray-800 bg-green-50 text-green-800 px-3 py-1.5 inline-block rounded-md">{core.salary_range}</p>
-              </div>
-            )}
-            
-            {/* Job description */}
-            {core.description && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">Job Description</h3>
-                <p className="text-gray-700 leading-relaxed">{core.description}</p>
-              </div>
-            )}
-            
-            {/* Requirements */}
-            {core.requirements && core.requirements.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">Requirements</h3>
-                <ul className="list-disc pl-5 space-y-1">
-                  {core.requirements.map((requirement, index) => (
-                    <li key={index} className="text-gray-700">{requirement}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {/* Benefits */}
-            {core.benefits && core.benefits.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">Benefits</h3>
-                <ul className="list-disc pl-5 space-y-1">
-                  {core.benefits.map((benefit, index) => (
-                    <li key={index} className="text-gray-700">{benefit}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {/* Apply button */}
-            <div className="mt-8 flex justify-center">
-              <a 
-                href={core.redirect_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="primary-button flex items-center gap-2"
-              >
-                <span>Apply for this position</span>
-                <ExternalLink size={16} />
-              </a>
             </div>
           </div>
         </div>
