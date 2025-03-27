@@ -58,28 +58,93 @@ Output: [0,1]
 Can you come up with an algorithm that is less than O(n²) time complexity?
     `,
     testCases: [
-      { input: "nums = [2,7,11,15], target = 9", output: "[0,1]" },
-      { input: "nums = [3,2,4], target = 6", output: "[1,2]" },
-      { input: "nums = [3,3], target = 6", output: "[0,1]" },
+      { 
+        input: { nums: [2, 7, 11, 15], target: 9 },
+        output: [0, 1],
+        displayInput: "nums = [2,7,11,15], target = 9",
+        displayOutput: "[0,1]"
+      },
+      { 
+        input: { nums: [3, 2, 4], target: 6 },
+        output: [1, 2],
+        displayInput: "nums = [3,2,4], target = 6",
+        displayOutput: "[1,2]"
+      },
+      { 
+        input: { nums: [3, 3], target: 6 },
+        output: [0, 1],
+        displayInput: "nums = [3,3], target = 6",
+        displayOutput: "[0,1]"
+      }
     ],
     startingCode: {
       javascript: `function twoSum(nums, target) {
     // Your code here
-};`,
+};
+
+// Example usage - DO NOT MODIFY THIS
+function runTestCase(input) {
+    return twoSum(input.nums, input.target);
+}`,
       python: `def twoSum(nums, target):
     # Your code here
-    pass`,
+    pass
+    
+# Example usage - DO NOT MODIFY THIS
+def runTestCase(input):
+    return twoSum(input["nums"], input["target"])`,
       java: `class Solution {
     public int[] twoSum(int[] nums, int target) {
         // Your code here
+        return new int[]{};
+    }
+    
+    // Example usage - DO NOT MODIFY THIS
+    public static int[] runTestCase(java.util.Map<String, Object> input) {
+        int[] nums = (int[])input.get("nums");
+        int target = (int)input.get("target");
+        return new Solution().twoSum(nums, target);
     }
 }`,
-      cpp: `class Solution {
+      cpp: `#include <vector>
+#include <map>
+using namespace std;
+
+class Solution {
 public:
     vector<int> twoSum(vector<int>& nums, int target) {
         // Your code here
+        return {};
+    }
+    
+    // Example usage - DO NOT MODIFY THIS
+    static vector<int> runTestCase(map<string, void*> input) {
+        vector<int>* nums = static_cast<vector<int>*>(input["nums"]);
+        int target = *static_cast<int*>(input["target"]);
+        return Solution().twoSum(*nums, target);
     }
 };`,
+    },
+    sampleSolution: {
+      javascript: `function twoSum(nums, target) {
+    const map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (map.has(complement)) {
+            return [map.get(complement), i];
+        }
+        map.set(nums[i], i);
+    }
+    return [];
+};`,
+      python: `def twoSum(nums, target):
+    hashmap = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in hashmap:
+            return [hashmap[complement], i]
+        hashmap[num] = i
+    return []`,
     },
     tags: ["Array", "Hash Table"],
   },
@@ -118,30 +183,118 @@ Output: false
 - s consists of parentheses only '()[]{}'
     `,
     testCases: [
-      { input: 's = "()"', output: "true" },
-      { input: 's = "()[]{}"', output: "true" },
-      { input: 's = "(]"', output: "false" },
-      { input: 's = "([)]"', output: "false" },
-      { input: 's = "{[]}"', output: "true" },
+      { 
+        input: { s: "()" },
+        output: true,
+        displayInput: 's = "()"',
+        displayOutput: "true"
+      },
+      { 
+        input: { s: "()[]{}" },
+        output: true,
+        displayInput: 's = "()[]{}"',
+        displayOutput: "true"
+      },
+      { 
+        input: { s: "(]" },
+        output: false,
+        displayInput: 's = "(]"',
+        displayOutput: "false"
+      },
+      { 
+        input: { s: "([)]" },
+        output: false,
+        displayInput: 's = "([)]"',
+        displayOutput: "false"
+      },
+      { 
+        input: { s: "{[]}" },
+        output: true,
+        displayInput: 's = "{[]}"',
+        displayOutput: "true"
+      }
     ],
     startingCode: {
       javascript: `function isValid(s) {
     // Your code here
-};`,
+};
+
+// Example usage - DO NOT MODIFY THIS
+function runTestCase(input) {
+    return isValid(input.s);
+}`,
       python: `def isValid(s):
     # Your code here
-    pass`,
+    pass
+    
+# Example usage - DO NOT MODIFY THIS
+def runTestCase(input):
+    return isValid(input["s"])`,
       java: `class Solution {
     public boolean isValid(String s) {
         // Your code here
+        return false;
+    }
+    
+    // Example usage - DO NOT MODIFY THIS
+    public static boolean runTestCase(java.util.Map<String, Object> input) {
+        String s = (String)input.get("s");
+        return new Solution().isValid(s);
     }
 }`,
-      cpp: `class Solution {
+      cpp: `#include <string>
+#include <map>
+using namespace std;
+
+class Solution {
 public:
     bool isValid(string s) {
         // Your code here
+        return false;
+    }
+    
+    // Example usage - DO NOT MODIFY THIS
+    static bool runTestCase(map<string, void*> input) {
+        string* s = static_cast<string*>(input["s"]);
+        return Solution().isValid(*s);
     }
 };`,
+    },
+    sampleSolution: {
+      javascript: `function isValid(s) {
+    const stack = [];
+    const map = {
+        '(': ')',
+        '[': ']',
+        '{': '}'
+    };
+    
+    for (let i = 0; i < s.length; i++) {
+        if (s[i] === '(' || s[i] === '[' || s[i] === '{') {
+            stack.push(s[i]);
+        } else {
+            const lastBracket = stack.pop();
+            if (map[lastBracket] !== s[i]) {
+                return false;
+            }
+        }
+    }
+    
+    return stack.length === 0;
+};`,
+      python: `def isValid(s):
+    stack = []
+    mapping = {")": "(", "}": "{", "]": "["}
+    
+    for char in s:
+        if char in mapping:
+            top_element = stack.pop() if stack else '#'
+            if mapping[char] != top_element:
+                return False
+        else:
+            stack.append(char)
+    
+    return not stack`,
     },
     tags: ["Stack", "String"],
   },
@@ -212,6 +365,7 @@ const CodeQuestion = () => {
   const [timeLeft, setTimeLeft] = useState<number>(30 * 60); // 30 minutes in seconds
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState<boolean>(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+  const [customTestCase, setCustomTestCase] = useState<string>("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Create Judge0 client
@@ -269,26 +423,15 @@ const CodeQuestion = () => {
         return;
       }
 
-      // Prepare test cases stdin
-      const testCaseInputs = question.testCases
-        .map((tc) => {
-          // Parse the input string to extract values
-          // This is a simplified example - in a real app, we'd need more robust parsing
-          const inputStr = tc.input
-            .replace(/nums\s*=\s*/, "")
-            .replace(/target\s*=\s*/, "")
-            .replace(/s\s*=\s*/, "");
+      // Prepare test cases and wrapper code
+      const wrapperCode = generateWrapperCode(code, selectedLanguage, question.testCases);
 
-          return inputStr;
-        })
-        .join("\n");
-
-      // Execute code using Judge0 - use base64_encoded=true to handle UTF-8 issues
+      // Execute code using Judge0
       const result = await judge0Client.executeCode(
-        code,
+        wrapperCode,
         selectedLanguage,
-        testCaseInputs,
-        true,
+        "",  // No stdin needed as inputs are in the wrapper code
+        true
       );
 
       processJudge0Result(result);
@@ -296,6 +439,137 @@ const CodeQuestion = () => {
       console.error("Error running code:", error);
       setOutput(
         `Error running your code: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  // Generate wrapper code that runs each test case individually
+  const generateWrapperCode = (userCode: string, language: string, testCases: any[]) => {
+    switch (language) {
+      case 'javascript':
+        return `
+${userCode}
+
+// Test runner
+function runTests() {
+  const testCases = ${JSON.stringify(testCases.map(tc => tc.input))};
+  const results = [];
+  
+  for (let i = 0; i < testCases.length; i++) {
+    try {
+      const result = runTestCase(testCases[i]);
+      results.push({
+        input: testCases[i],
+        output: result,
+        error: null
+      });
+    } catch (error) {
+      results.push({
+        input: testCases[i],
+        output: null,
+        error: error.message
+      });
+    }
+  }
+  
+  console.log(JSON.stringify(results));
+}
+
+runTests();
+`;
+      case 'python':
+        return `
+${userCode}
+
+# Test runner
+import json
+
+def run_tests():
+    test_cases = ${JSON.stringify(testCases.map(tc => tc.input))}
+    results = []
+    
+    for tc in test_cases:
+        try:
+            result = runTestCase(tc)
+            results.append({
+                "input": tc,
+                "output": result,
+                "error": None
+            })
+        except Exception as e:
+            results.append({
+                "input": tc,
+                "output": None,
+                "error": str(e)
+            })
+    
+    print(json.dumps(results))
+
+run_tests()
+`;
+      // Add similar wrappers for other languages
+      default:
+        return userCode;
+    }
+  };
+
+  // Run a single custom test case
+  const runCustomTestCase = async () => {
+    if (!question || !customTestCase) return;
+
+    setIsRunning(true);
+    setOutput("Running your custom test case...");
+
+    try {
+      let parsedInput;
+      try {
+        // Try to parse the input as JSON
+        parsedInput = JSON.parse(customTestCase);
+      } catch (e) {
+        setOutput("Invalid test case format. Please check your input.");
+        setIsRunning(false);
+        return;
+      }
+
+      // Create wrapper code for a single test case
+      const singleTestCase = {
+        input: parsedInput,
+        displayInput: customTestCase
+      };
+      
+      const wrapperCode = generateWrapperCode(code, selectedLanguage, [singleTestCase]);
+
+      // Check if we have RapidAPI key
+      const rapidApiKey = process.env.NEXT_PUBLIC_RAPIDAPI_KEY;
+
+      if (!rapidApiKey) {
+        // Fallback to mock execution if no API key
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const mockResult = `Custom Test Case Result:
+Input: ${customTestCase}
+Output: ${Math.random() > 0.5 ? JSON.stringify(question.testCases[0].output) : "Error: Runtime error"}`;
+        setOutput(mockResult);
+        setIsRunning(false);
+        return;
+      }
+
+      // Execute code using Judge0
+      const result = await judge0Client.executeCode(
+        wrapperCode,
+        selectedLanguage,
+        "",
+        true
+      );
+
+      // Process custom test case result
+      processCustomTestResult(result, parsedInput);
+      
+    } catch (error) {
+      console.error("Error running custom test:", error);
+      setOutput(
+        `Error running your custom test: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     } finally {
       setIsRunning(false);
@@ -325,23 +599,78 @@ const CodeQuestion = () => {
       return;
     }
 
-    // Process successful output - Show the actual output first
-    const output = result.stdout || "No output";
+    // Parse the results from stdout
+    try {
+      const output = result.stdout || "[]";
+      const testResults = JSON.parse(output);
+      
+      // Format test case results
+      const testCaseResults = question?.testCases
+        .map((tc, idx) => {
+          const testResult = testResults[idx];
+          const passed = JSON.stringify(testResult.output) === JSON.stringify(tc.output);
+          
+          return `Test Case ${idx + 1}:
+Input: ${tc.displayInput}
+Expected: ${tc.displayOutput}
+Your output: ${JSON.stringify(testResult.output)}
+${testResult.error ? `Error: ${testResult.error}` : ''}
+Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
+        })
+        .join("\n\n");
 
-    // Format test case results
-    const testCaseResults = question?.testCases
-      .map(
-        (tc, idx) =>
-          `Test Case ${idx + 1}:\nInput: ${tc.input}\nExpected: ${tc.output}\nYour output: ${output.trim()}\nStatus: ${output.trim().includes(tc.output.trim()) ? "✅ Passed" : "❌ Failed"}`,
-      )
-      .join("\n\n");
+      setOutput(`Test Results:\n\n${testCaseResults}`);
 
-    setOutput(`Output:\n${output}\n\n${testCaseResults}`);
+      // Check if all test cases passed
+      const allPassed = testResults.every((res: any, idx: number) => 
+        JSON.stringify(res.output) === JSON.stringify(question?.testCases[idx].output)
+      );
+      
+      if (allPassed) {
+        setIsSuccessModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error parsing test results:", error);
+      setOutput(`Error parsing test results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`);
+    }
+  };
 
-    // Only show success modal if all test cases pass
-    const allTestCasesPassed = Math.random() > 0.3; // In a real app, we'd actually check each test case
-    if (allTestCasesPassed) {
-      setIsSuccessModalOpen(true);
+  // Process custom test result
+  const processCustomTestResult = (result: SubmissionResult, input: any) => {
+    // Check for compilation errors
+    if (result.compile_output) {
+      setOutput(`Compilation Error:\n${result.compile_output}`);
+      return;
+    }
+
+    // Check for runtime errors
+    if (result.stderr) {
+      setOutput(`Runtime Error:\n${result.stderr}`);
+      return;
+    }
+
+    // Parse the results from stdout
+    try {
+      const output = result.stdout || "[]";
+      const testResults = JSON.parse(output);
+      
+      if (testResults.length > 0) {
+        const testResult = testResults[0];
+        
+        const formattedResult = `Custom Test Case Result:
+Input: ${JSON.stringify(input)}
+Output: ${JSON.stringify(testResult.output)}
+${testResult.error ? `Error: ${testResult.error}` : ''}
+Execution Time: ${result.time || 'N/A'}s
+Memory Used: ${result.memory || 'N/A'} KB`;
+
+        setOutput(formattedResult);
+      } else {
+        setOutput("No results returned from execution.");
+      }
+    } catch (error) {
+      console.error("Error parsing custom test result:", error);
+      setOutput(`Error parsing test results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`);
     }
   };
 
@@ -351,30 +680,30 @@ const CodeQuestion = () => {
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Mock output
-    const success = Math.random() > 0.3; // 70% chance of success for demo
+    // Mock output with proper test case format
+    const testResults = question.testCases.map((tc, idx) => {
+      const passed = Math.random() > 0.3; // 70% chance of passing for demo
+      return {
+        input: tc.input,
+        expected: tc.output,
+        output: passed ? tc.output : (idx % 2 === 0 ? [] : [1, 0]),
+        passed
+      };
+    });
 
-    if (success) {
-      setOutput(
-        "Test cases passed!\n\n" +
-          question.testCases
-            .map(
-              (tc, idx) =>
-                `Test Case ${idx + 1}:\nInput: ${tc.input}\nExpected: ${tc.output}\nYour output: ${tc.output}\nStatus: ✅ Passed`,
-            )
-            .join("\n\n"),
-      );
+    const formattedResults = testResults.map((result, idx) => 
+      `Test Case ${idx + 1}:
+Input: ${question.testCases[idx].displayInput}
+Expected: ${question.testCases[idx].displayOutput}
+Your output: ${JSON.stringify(result.output)}
+Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
+    ).join("\n\n");
+
+    setOutput(`Test Results:\n\n${formattedResults}`);
+
+    // Only show success modal if all test cases pass
+    if (testResults.every(r => r.passed)) {
       setIsSuccessModalOpen(true);
-    } else {
-      setOutput(
-        "Some test cases failed!\n\n" +
-          question.testCases
-            .map((tc, idx) => {
-              const passed = Math.random() > 0.3;
-              return `Test Case ${idx + 1}:\nInput: ${tc.input}\nExpected: ${tc.output}\nYour output: ${passed ? tc.output : "Incorrect output"}\nStatus: ${passed ? "✅ Passed" : "❌ Failed"}`;
-            })
-            .join("\n\n"),
-      );
     }
   };
 
@@ -386,37 +715,23 @@ const CodeQuestion = () => {
     setOutput("Submitting your solution...");
 
     try {
-      // Check if we have RapidAPI key
+      // Same as runCode but with submission flag
       const rapidApiKey = process.env.NEXT_PUBLIC_RAPIDAPI_KEY;
 
       if (!rapidApiKey) {
-        // Fallback to mock execution if no API key
         await mockSubmission();
         return;
       }
 
-      // Similar to runCode but this is a final submission
-      const testCaseInputs = question.testCases
-        .map((tc) => {
-          // Parse the input string to extract values
-          const inputStr = tc.input
-            .replace(/nums\s*=\s*/, "")
-            .replace(/target\s*=\s*/, "")
-            .replace(/s\s*=\s*/, "");
+      const wrapperCode = generateWrapperCode(code, selectedLanguage, question.testCases);
 
-          return inputStr;
-        })
-        .join("\n");
-
-      // Execute code using Judge0 - use base64_encoded=true to handle UTF-8 issues
       const result = await judge0Client.executeCode(
-        code,
+        wrapperCode,
         selectedLanguage,
-        testCaseInputs,
-        true,
+        "",
+        true
       );
 
-      // Process the result for submission
       processSubmissionResult(result);
     } catch (error) {
       console.error("Error submitting code:", error);
@@ -430,42 +745,59 @@ const CodeQuestion = () => {
 
   // Process Judge0 result for submission
   const processSubmissionResult = (result: SubmissionResult) => {
-    // Check for compilation errors
+    // Similar to processJudge0Result but shows success modal on success
     if (result.compile_output) {
       setOutput(`Compilation Error:\n${result.compile_output}`);
-      setIsSuccessModalOpen(false); // Don't show success modal
       return;
     }
 
-    // Check for runtime errors
     if (result.stderr) {
       setOutput(`Runtime Error:\n${result.stderr}`);
-      setIsSuccessModalOpen(false); // Don't show success modal
       return;
     }
 
-    // Check status
     if (result.status.id !== 3) {
-      // 3 = Accepted
       setOutput(
         `Execution Error: ${result.status.description}\n${result.message || ""}`,
       );
-      setIsSuccessModalOpen(false); // Don't show success modal
       return;
     }
 
-    // Process successful output
-    const output = result.stdout || "No output";
-    setOutput(
-      `Submission Successful!\n\nOutput:\n${output}\n\nExecution Time: ${result.time}s\nMemory Used: ${result.memory} KB`,
-    );
+    try {
+      const output = result.stdout || "[]";
+      const testResults = JSON.parse(output);
+      
+      const testCaseResults = question?.testCases
+        .map((tc, idx) => {
+          const testResult = testResults[idx];
+          const passed = JSON.stringify(testResult.output) === JSON.stringify(tc.output);
+          
+          return `Test Case ${idx + 1}:
+Input: ${tc.displayInput}
+Expected: ${tc.displayOutput}
+Your output: ${JSON.stringify(testResult.output)}
+${testResult.error ? `Error: ${testResult.error}` : ''}
+Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
+        })
+        .join("\n\n");
 
-    // Always show success modal for submission
-    setIsSuccessModalOpen(true);
+      const allPassed = testResults.every((res: any, idx: number) => 
+        JSON.stringify(res.output) === JSON.stringify(question?.testCases[idx].output)
+      );
 
-    // Clear timer as test is completed
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
+      setOutput(`Submission Results:\n\n${testCaseResults}\n\nExecution Time: ${result.time}s\nMemory Used: ${result.memory} KB`);
+      
+      if (allPassed) {
+        setIsSuccessModalOpen(true);
+        
+        // Clear timer as test is completed
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing submission results:", error);
+      setOutput(`Error parsing submission results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`);
     }
   };
 
@@ -477,33 +809,43 @@ const CodeQuestion = () => {
 
     // For demo purposes, we'll assume 70% chance of success
     const success = Math.random() > 0.3;
+    
+    const testResults = question.testCases.map((tc, idx) => {
+      const passed = success || Math.random() > 0.3; 
+      return {
+        input: tc.input,
+        expected: tc.output,
+        output: passed ? tc.output : (idx % 2 === 0 ? [] : [1, 0]),
+        passed
+      };
+    });
 
-    if (success) {
-      setOutput(
-        "All test cases passed!\n\n" +
-          question.testCases
-            .map(
-              (tc, idx) =>
-                `Test Case ${idx + 1}:\nInput: ${tc.input}\nExpected: ${tc.output}\nYour output: ${tc.output}\nStatus: ✅ Passed`,
-            )
-            .join("\n\n"),
-      );
+    const formattedResults = testResults.map((result, idx) => 
+      `Test Case ${idx + 1}:
+Input: ${question.testCases[idx].displayInput}
+Expected: ${question.testCases[idx].displayOutput}
+Your output: ${JSON.stringify(result.output)}
+Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
+    ).join("\n\n");
+
+    setOutput(`Submission Results:\n\n${formattedResults}`);
+
+    if (testResults.every(r => r.passed)) {
       setIsSuccessModalOpen(true);
 
       // Clear timer as test is completed
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
+    }
+  };
+
+  // Helper function to show sample solution
+  const showSampleSolution = () => {
+    if (question?.sampleSolution && question.sampleSolution[selectedLanguage as keyof typeof question.sampleSolution]) {
+      setCode(question.sampleSolution[selectedLanguage as keyof typeof question.sampleSolution]);
     } else {
-      setOutput(
-        "Some test cases failed!\n\n" +
-          question.testCases
-            .map((tc, idx) => {
-              const passed = Math.random() > 0.3;
-              return `Test Case ${idx + 1}:\nInput: ${tc.input}\nExpected: ${tc.output}\nYour output: ${passed ? tc.output : "Incorrect output"}\nStatus: ${passed ? "✅ Passed" : "❌ Failed"}`;
-            })
-            .join("\n\n"),
-      );
+      setOutput("No sample solution available for the selected language.");
     }
   };
 
@@ -570,85 +912,112 @@ const CodeQuestion = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         <PanelGroup direction="vertical">
-          {/* Problem Description Panel */}
-          <Panel defaultSize={35} minSize={20}>
-            <div className="h-full overflow-auto p-6 bg-white dark:bg-slate-900">
-              <div className="prose dark:prose-invert max-w-none">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: question.fullDescription.replace(/\n/g, "<br />"),
-                  }}
-                />
-
-                <h3 className="mt-6">Example Test Cases</h3>
-                <div className="mt-4 space-y-4">
-                  {question.testCases.map((testCase, index) => (
+          {/* Top Section with Problem and Code Editor side by side */}
+          <Panel defaultSize={70} minSize={40}>
+            <PanelGroup direction="horizontal">
+              {/* Problem Description Panel */}
+              <Panel defaultSize={50} minSize={30}>
+                <div className="h-full overflow-auto p-6 bg-white dark:bg-slate-900">
+                  <div className="prose dark:prose-invert max-w-none">
                     <div
-                      key={index}
-                      className="bg-gray-50 dark:bg-slate-800 p-4 rounded-md"
-                    >
-                      <div className="font-mono text-sm">
-                        <div>
-                          <strong>Input:</strong> {testCase.input}
+                      dangerouslySetInnerHTML={{
+                        __html: question.fullDescription.replace(/\n/g, "<br />"),
+                      }}
+                    />
+
+                    <h3 className="mt-6">Example Test Cases</h3>
+                    <div className="mt-4 space-y-4">
+                      {question.testCases.map((testCase, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-50 dark:bg-slate-800 p-4 rounded-md"
+                        >
+                          <div className="font-mono text-sm">
+                            <div>
+                              <strong>Input:</strong> {testCase.displayInput}
+                            </div>
+                            <div>
+                              <strong>Output:</strong> {testCase.displayOutput}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <strong>Output:</strong> {testCase.output}
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
-            </div>
+              </Panel>
+
+              {/* Horizontal Resize Handle */}
+              <PanelResizeHandle className="w-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors" />
+
+              {/* Code Editor Panel */}
+              <Panel defaultSize={50} minSize={30}>
+                <div className="h-full flex flex-col">
+                  <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 flex items-center">
+                    <Code className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Code Editor
+                    </span>
+                    <div className="ml-auto flex items-center space-x-2">
+                      <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-900 rounded px-2 py-1 text-gray-700 dark:text-gray-300"
+                      >
+                        {languageOptions.map((lang) => (
+                          <option key={lang.value} value={lang.value}>
+                            {lang.label}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={showSampleSolution}
+                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        Show Solution
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-auto p-4 bg-gray-50 dark:bg-slate-950">
+                    <CodeEditor
+                      value={code}
+                      onChange={setCode}
+                      language={selectedLanguage}
+                      placeholder="Write your code here..."
+                      className="w-full h-full"
+                    />
+                  </div>
+                </div>
+              </Panel>
+            </PanelGroup>
           </Panel>
 
-          {/* Resize Handle */}
-          <PanelResizeHandle className="h-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors" />
-
-          {/* Code Editor Panel */}
-          <Panel defaultSize={40} minSize={20}>
-            <div className="h-full flex flex-col">
-              <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 flex items-center">
-                <Code className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Code Editor
-                </span>
-                <div className="ml-auto">
-                  <select
-                    value={selectedLanguage}
-                    onChange={(e) => setSelectedLanguage(e.target.value)}
-                    className="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-900 rounded px-2 py-1 text-gray-700 dark:text-gray-300"
-                  >
-                    {languageOptions.map((lang) => (
-                      <option key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="flex-1 overflow-auto p-4 bg-gray-50 dark:bg-slate-950">
-                <CodeEditor
-                  value={code}
-                  onChange={setCode}
-                  language={selectedLanguage}
-                  placeholder="Write your code here..."
-                  className="w-full h-full"
-                />
-              </div>
-            </div>
-          </Panel>
-
-          {/* Resize Handle */}
+          {/* Vertical Resize Handle */}
           <PanelResizeHandle className="h-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors" />
 
           {/* Output Panel */}
-          <Panel defaultSize={25} minSize={15}>
+          <Panel defaultSize={30} minSize={20}>
             <div className="h-full flex flex-col">
-              <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700">
+              <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Output
                 </span>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={customTestCase}
+                    onChange={(e) => setCustomTestCase(e.target.value)}
+                    placeholder='Enter custom test case e.g. {"nums":[1,2,3],"target":3}'
+                    className="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-900 rounded px-2 py-1 text-gray-700 dark:text-gray-300 w-64"
+                  />
+                  <button
+                    onClick={runCustomTestCase}
+                    disabled={isRunning || isSubmitting || !customTestCase}
+                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Run Custom Test
+                  </button>
+                </div>
               </div>
               <div className="flex-1 overflow-auto p-4 bg-black text-green-400 font-mono text-sm whitespace-pre">
                 {output || "Run your code to see the output..."}
