@@ -66,7 +66,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   // Highlight the code
   const highlightCode = (code: string) => {
-    if (!code) return '';
+    if (!code) return placeholder;
     
     const patterns = getPatterns(language);
     
@@ -77,21 +77,68 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
     
-    // 2. Apply highlighting patterns
-    highlighted = highlighted
-      // Comments (first to avoid highlighting inside comments)
-      .replace(patterns.comments, match => `<span class="text-gray-500">${match}</span>`)
-      // Strings
-      .replace(patterns.strings, match => `<span class="text-green-500">${match}</span>`)
-      // Keywords
-      .replace(patterns.keywords, match => `<span class="text-purple-500 font-medium">${match}</span>`)
-      // Functions
-      .replace(patterns.functions, match => {
-        const functionName = match.substring(0, match.length - 1);
-        return `<span class="text-blue-500">${functionName}</span>(`;
-      })
-      // Numbers
-      .replace(patterns.numbers, match => `<span class="text-orange-500">${match}</span>`);
+    // 2. Apply highlighting patterns - but protect from overlapping replacements
+    // Store the replacements and their positions
+    const replacements: { start: number; end: number; html: string }[] = [];
+    
+    // Add replacements for comments
+    let match;
+    while ((match = patterns.comments.exec(highlighted)) !== null) {
+      replacements.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        html: `<span class="text-gray-500">${match[0]}</span>`
+      });
+    }
+    
+    // Add replacements for strings
+    patterns.strings.lastIndex = 0; // Reset the regex
+    while ((match = patterns.strings.exec(highlighted)) !== null) {
+      replacements.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        html: `<span class="text-green-500">${match[0]}</span>`
+      });
+    }
+    
+    // Add replacements for keywords
+    patterns.keywords.lastIndex = 0;
+    while ((match = patterns.keywords.exec(highlighted)) !== null) {
+      replacements.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        html: `<span class="text-purple-500 font-medium">${match[0]}</span>`
+      });
+    }
+    
+    // Add replacements for functions
+    patterns.functions.lastIndex = 0;
+    while ((match = patterns.functions.exec(highlighted)) !== null) {
+      const functionName = match[0].substring(0, match[0].length - 1);
+      replacements.push({
+        start: match.index,
+        end: match.index + functionName.length,
+        html: `<span class="text-blue-500">${functionName}</span>`
+      });
+    }
+    
+    // Add replacements for numbers
+    patterns.numbers.lastIndex = 0;
+    while ((match = patterns.numbers.exec(highlighted)) !== null) {
+      replacements.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        html: `<span class="text-orange-500">${match[0]}</span>`
+      });
+    }
+    
+    // Sort replacements by position (last to first)
+    replacements.sort((a, b) => b.start - a.start);
+    
+    // Apply replacements
+    for (const { start, end, html } of replacements) {
+      highlighted = highlighted.substring(0, start) + html + highlighted.substring(end);
+    }
     
     // Replace newlines with <br> for display
     highlighted = highlighted.replace(/\n/g, '<br>');
@@ -132,8 +179,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     <div className={`relative font-mono text-sm ${className}`}>
       {/* Hidden pre element for syntax highlighting */}
       <pre 
-        className={`absolute top-0 left-0 right-0 bottom-0 p-2 overflow-hidden whitespace-pre-wrap break-words ${isFocused ? 'border-blue-500' : 'border-gray-300 dark:border-gray-700'} bg-white dark:bg-slate-900 text-transparent`}
-        dangerouslySetInnerHTML={{ __html: highlightCode(value) || placeholder }}
+        className={`absolute top-0 left-0 right-0 bottom-0 p-2 overflow-hidden whitespace-pre-wrap break-words border ${isFocused ? 'border-blue-500' : 'border-gray-300 dark:border-gray-700'} bg-white dark:bg-slate-900 pointer-events-none`}
+        style={{ color: 'inherit' }}
+        dangerouslySetInnerHTML={{ __html: highlightCode(value) }}
+        aria-hidden="true"
       />
       
       {/* Actual textarea for editing */}
@@ -144,8 +193,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className="w-full h-full p-2 bg-transparent border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none z-10 relative"
-        style={{ caretColor: 'black', minHeight: '200px' }}
+        className="w-full h-full p-2 bg-transparent border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-transparent caret-slate-900 dark:caret-white"
+        style={{ minHeight: '200px' }}
         spellCheck="false"
         placeholder={placeholder}
       />
