@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import createJudge0Client, { type SubmissionResult } from "@/lib/judge0";
 import CodeEditor from "@/components/ui/code-editor";
 import confetti from "canvas-confetti";
+import { apiPut, apiGet } from "@/lib/api";
 
 // Mock data - in a real app, this would come from an API
 const codingQuestions = [
@@ -642,8 +643,15 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
         JSON.stringify(res.output) === JSON.stringify(question?.testCases[idx].output)
       );
       
+      console.log("Test run results:", testCaseResults);
       if (allPassed) {
-        setCompletionTime(30 * 60 - timeLeft);
+        // Calculate completion time
+        const completionTime = 30 * 60 - timeLeft;
+        setCompletionTime(completionTime);
+        
+        // Save the successful submission to the database
+        saveSubmissionToDatabase(completionTime);
+        
         setIsSuccessModalOpen(true);
         triggerSuccessConfetti();
       }
@@ -718,10 +726,17 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     ).join("\n\n");
 
     setOutput(`Test Results:\n\n${formattedResults}`);
+    console.log("Mock execution results:", formattedResults);
 
     // Only show success modal if all test cases pass
     if (testResults.every(r => r.passed)) {
-      setCompletionTime(30 * 60 - timeLeft);
+      // Calculate completion time
+      const completionTime = 30 * 60 - timeLeft;
+      setCompletionTime(completionTime);
+      
+      // Save the successful submission to the database
+      saveSubmissionToDatabase(completionTime);
+      
       setIsSuccessModalOpen(true);
       triggerSuccessConfetti();
     }
@@ -763,7 +778,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     }
   };
 
-  // Modified to also trigger confetti
+  // Modified to also trigger confetti and save to database
   const processSubmissionResult = (result: SubmissionResult) => {
     // Similar to processJudge0Result but shows success modal on success
     if (result.compile_output) {
@@ -807,8 +822,15 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
 
       setOutput(`Submission Results:\n\n${testCaseResults}\n\nExecution Time: ${result.time}s\nMemory Used: ${result.memory} KB`);
       
+      console.log("Submission results:", testCaseResults);
       if (allPassed) {
-        setCompletionTime(30 * 60 - timeLeft);
+        // Calculate completion time
+        const completionTime = 30 * 60 - timeLeft;
+        setCompletionTime(completionTime);
+        
+        // Save the successful submission to the database
+        saveSubmissionToDatabase(completionTime);
+        
         setIsSuccessModalOpen(true);
         triggerSuccessConfetti();
         
@@ -820,6 +842,82 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
     } catch (error) {
       console.error("Error parsing submission results:", error);
       setOutput(`Error parsing submission results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`);
+    }
+  };
+
+  // Function to save submission to the database
+  const saveSubmissionToDatabase = async (completionTime: number) => {
+    console.log("Saving Submission to database...");
+    if (!question) return;
+    
+    try {
+      // Get the interview ID from local storage or query params
+      // This assumes you're storing the current interview ID when navigating to this page
+      let interviewId;
+      
+      // Try to get interviewId from localStorage
+      if (typeof window !== 'undefined') {
+        interviewId = localStorage.getItem('currentInterviewId');
+      }
+      
+      // If interviewId is not in localStorage, check URL search params
+      if (!interviewId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        interviewId = urlParams.get('interviewId');
+      }
+      
+      // If still no interviewId, we can't proceed
+      if (!interviewId) {
+        console.error("No interview ID found - cannot save results");
+        return;
+      }
+      
+      console.log("Using interview ID:", interviewId);
+      
+      // First, fetch the current interview to get existing questions
+      interface InterviewResponse {
+        success: boolean;
+        data: {
+          _id: string;
+          questions?: Array<{
+            question: string;
+            answer?: string;
+            score?: number;
+          }>;
+          [key: string]: any; // For other fields we don't need here
+        };
+      }
+      
+      const currentInterviewResponse = await apiGet<InterviewResponse>(`/api/interviews/${interviewId}`);
+      if (!currentInterviewResponse.success) {
+        throw new Error("Failed to fetch current interview");
+      }
+      
+      // Get existing questions or initialize empty array
+      const existingQuestions = currentInterviewResponse.data.questions || [];
+      
+      // Create new question object
+      const newQuestion = {
+        question: question.title,
+        answer: code,
+        score: 10 // Assuming a perfect score for passing all test cases
+      };
+      
+      // Append the new question to existing questions
+      const updatedQuestions = [...existingQuestions, newQuestion];
+      
+      // Call the API to update the interview record
+      const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
+        status: "completed",
+        questions: updatedQuestions,
+        feedback: `Successfully completed ${question.title} in ${formatTime(completionTime)}.`
+      });
+      
+      console.log("Submission saved successfully:", response);
+    } catch (error) {
+      console.error("Error saving submission to database:", error);
+      // Don't show an error to the user here since the submission was technically successful
+      // This is just for database persistence
     }
   };
 
@@ -851,9 +949,16 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     ).join("\n\n");
 
     setOutput(`Submission Results:\n\n${formattedResults}`);
+    console.log("Submission results:", formattedResults);
 
     if (testResults.every(r => r.passed)) {
-      setCompletionTime(30 * 60 - timeLeft);
+      // Calculate completion time
+      const completionTime = 30 * 60 - timeLeft;
+      setCompletionTime(completionTime);
+      
+      // Save the successful submission to the database
+      saveSubmissionToDatabase(completionTime);
+      
       setIsSuccessModalOpen(true);
       triggerSuccessConfetti();
 
