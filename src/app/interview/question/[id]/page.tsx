@@ -13,10 +13,12 @@ import {
   Save,
   ExternalLink,
   CheckCircle,
+  Lock,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import createJudge0Client, { type SubmissionResult } from "@/lib/judge0";
 import CodeEditor from "@/components/ui/code-editor";
+import confetti from "canvas-confetti";
 
 // Mock data - in a real app, this would come from an API
 const codingQuestions = [
@@ -329,8 +331,13 @@ const Modal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-lg w-full max-w-md overflow-hidden shadow-xl transform transition-all">
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white dark:bg-slate-900 rounded-lg w-full max-w-md overflow-hidden shadow-xl transform"
+      >
         <div className="p-6">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             {title}
@@ -345,7 +352,7 @@ const Modal = ({
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -366,6 +373,7 @@ const CodeQuestion = () => {
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState<boolean>(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
   const [customTestCase, setCustomTestCase] = useState<string>("");
+  const [completionTime, setCompletionTime] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Create Judge0 client
@@ -404,6 +412,14 @@ const CodeQuestion = () => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  // Extract runTestCase function from the code
+  const extractRunTestCase = (code: string): string => {
+    // Using a more compatible regex without the 's' flag
+    const runTestCaseRegex = /\/\/ Example usage[\s\S]*?function runTestCase\([\s\S]*?\)[\s\S]*?\{[\s\S]*?\}|# Example usage[\s\S]*?def runTestCase\([\s\S]*?\):[\s\S]*?(?=\n\n|$)|\/\/ Example usage[\s\S]*?static[\s\S]*?runTestCase\([\s\S]*?\)[\s\S]*?\{[\s\S]*?\}/;
+    const match = code.match(runTestCaseRegex);
+    return match ? match[0] : "";
   };
 
   // Handle running the code with Judge0
@@ -627,7 +643,9 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       );
       
       if (allPassed) {
+        setCompletionTime(30 * 60 - timeLeft);
         setIsSuccessModalOpen(true);
+        triggerSuccessConfetti();
       }
     } catch (error) {
       console.error("Error parsing test results:", error);
@@ -703,7 +721,9 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
 
     // Only show success modal if all test cases pass
     if (testResults.every(r => r.passed)) {
+      setCompletionTime(30 * 60 - timeLeft);
       setIsSuccessModalOpen(true);
+      triggerSuccessConfetti();
     }
   };
 
@@ -743,7 +763,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     }
   };
 
-  // Process Judge0 result for submission
+  // Modified to also trigger confetti
   const processSubmissionResult = (result: SubmissionResult) => {
     // Similar to processJudge0Result but shows success modal on success
     if (result.compile_output) {
@@ -788,7 +808,9 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       setOutput(`Submission Results:\n\n${testCaseResults}\n\nExecution Time: ${result.time}s\nMemory Used: ${result.memory} KB`);
       
       if (allPassed) {
+        setCompletionTime(30 * 60 - timeLeft);
         setIsSuccessModalOpen(true);
+        triggerSuccessConfetti();
         
         // Clear timer as test is completed
         if (timerRef.current) {
@@ -831,7 +853,9 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     setOutput(`Submission Results:\n\n${formattedResults}`);
 
     if (testResults.every(r => r.passed)) {
+      setCompletionTime(30 * 60 - timeLeft);
       setIsSuccessModalOpen(true);
+      triggerSuccessConfetti();
 
       // Clear timer as test is completed
       if (timerRef.current) {
@@ -840,10 +864,59 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     }
   };
 
+  // Trigger confetti animation
+  const triggerSuccessConfetti = () => {
+    const count = 200;
+    const defaults = {
+      origin: { y: 0.7 },
+      zIndex: 5000,
+    };
+    
+    function fire(particleRatio: number, opts: any) {
+      confetti({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio)
+      });
+    }
+    
+    fire(0.25, {
+      spread: 26,
+      startVelocity: 55,
+    });
+    fire(0.2, {
+      spread: 60,
+    });
+    fire(0.35, {
+      spread: 100,
+      decay: 0.91,
+      scalar: 0.8
+    });
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 25,
+      decay: 0.92,
+      scalar: 1.2
+    });
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 45,
+    });
+  };
+
   // Helper function to show sample solution
   const showSampleSolution = () => {
     if (question?.sampleSolution && question.sampleSolution[selectedLanguage as keyof typeof question.sampleSolution]) {
-      setCode(question.sampleSolution[selectedLanguage as keyof typeof question.sampleSolution]);
+      const solutionCode = question.sampleSolution[selectedLanguage as keyof typeof question.sampleSolution];
+      const currentCode = code;
+      const runTestCasePart = extractRunTestCase(currentCode);
+      
+      // Merge the solution with the runTestCase function
+      if (runTestCasePart) {
+        setCode(solutionCode + "\n\n" + runTestCasePart);
+      } else {
+        setCode(solutionCode);
+      }
     } else {
       setOutput("No sample solution available for the selected language.");
     }
@@ -856,8 +929,8 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
   return (
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-slate-950">
       {/* Header */}
-      <header className="px-6 py-4 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-        <div className="flex items-center">
+      <header className="px-6 py-4 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center z-50">
           <button
             onClick={() => router.push("/interview")}
             className="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -879,7 +952,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
             {question.difficulty}
           </span>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center z-50">
           <div className="mr-4 flex items-center">
             <Clock className="w-4 h-4 mr-1 text-gray-500 dark:text-gray-400" />
             <span
@@ -910,118 +983,130 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
-        <PanelGroup direction="vertical">
-          {/* Top Section with Problem and Code Editor side by side */}
-          <Panel defaultSize={70} minSize={40}>
-            <PanelGroup direction="horizontal">
-              {/* Problem Description Panel */}
-              <Panel defaultSize={50} minSize={30}>
-                <div className="h-full overflow-auto p-6 bg-white dark:bg-slate-900">
-                  <div className="prose dark:prose-invert max-w-none">
+      <div className="flex-1 overflow-hidden flex">
+        <PanelGroup direction="horizontal" className="w-full h-full">
+          {/* Problem Description Panel - Left Side */}
+          <Panel defaultSize={40} minSize={30}>
+            <div className="h-full overflow-auto p-6 bg-white dark:bg-slate-900">
+              <div className="prose dark:prose-invert max-w-none">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: question.fullDescription.replace(/\n/g, "<br />"),
+                  }}
+                />
+
+                <h3 className="mt-6">Example Test Cases</h3>
+                <div className="mt-4 space-y-4">
+                  {question.testCases.map((testCase, index) => (
                     <div
-                      dangerouslySetInnerHTML={{
-                        __html: question.fullDescription.replace(/\n/g, "<br />"),
-                      }}
-                    />
-
-                    <h3 className="mt-6">Example Test Cases</h3>
-                    <div className="mt-4 space-y-4">
-                      {question.testCases.map((testCase, index) => (
-                        <div
-                          key={index}
-                          className="bg-gray-50 dark:bg-slate-800 p-4 rounded-md"
-                        >
-                          <div className="font-mono text-sm">
-                            <div>
-                              <strong>Input:</strong> {testCase.displayInput}
-                            </div>
-                            <div>
-                              <strong>Output:</strong> {testCase.displayOutput}
-                            </div>
-                          </div>
+                      key={index}
+                      className="bg-gray-50 dark:bg-slate-800 p-4 rounded-md"
+                    >
+                      <div className="font-mono text-sm">
+                        <div>
+                          <strong>Input:</strong> {testCase.displayInput}
                         </div>
-                      ))}
+                        <div>
+                          <strong>Output:</strong> {testCase.displayOutput}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              </Panel>
-
-              {/* Horizontal Resize Handle */}
-              <PanelResizeHandle className="w-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors" />
-
-              {/* Code Editor Panel */}
-              <Panel defaultSize={50} minSize={30}>
-                <div className="h-full flex flex-col">
-                  <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 flex items-center">
-                    <Code className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Code Editor
-                    </span>
-                    <div className="ml-auto flex items-center space-x-2">
-                      <select
-                        value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-900 rounded px-2 py-1 text-gray-700 dark:text-gray-300"
-                      >
-                        {languageOptions.map((lang) => (
-                          <option key={lang.value} value={lang.value}>
-                            {lang.label}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={showSampleSolution}
-                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        Show Solution
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-auto p-4 bg-gray-50 dark:bg-slate-950">
-                    <CodeEditor
-                      value={code}
-                      onChange={setCode}
-                      language={selectedLanguage}
-                      placeholder="Write your code here..."
-                      className="w-full h-full"
-                    />
-                  </div>
-                </div>
-              </Panel>
-            </PanelGroup>
+              </div>
+            </div>
           </Panel>
 
-          {/* Vertical Resize Handle */}
-          <PanelResizeHandle className="h-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors" />
+          {/* Horizontal Resize Handle */}
+          <PanelResizeHandle className="w-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors" />
 
-          {/* Output Panel */}
-          <Panel defaultSize={30} minSize={20}>
+          {/* Right Side Panel Group */}
+          <Panel defaultSize={60} minSize={40}>
             <div className="h-full flex flex-col">
-              <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Output
-                </span>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={customTestCase}
-                    onChange={(e) => setCustomTestCase(e.target.value)}
-                    placeholder='Enter custom test case e.g. {"nums":[1,2,3],"target":3}'
-                    className="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-900 rounded px-2 py-1 text-gray-700 dark:text-gray-300 w-64"
-                  />
-                  <button
-                    onClick={runCustomTestCase}
-                    disabled={isRunning || isSubmitting || !customTestCase}
-                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Run Custom Test
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-auto p-4 bg-black text-green-400 font-mono text-sm whitespace-pre">
-                {output || "Run your code to see the output..."}
-              </div>
+              <PanelGroup direction="vertical" className="h-full">
+                {/* Code Editor Panel - Top Right */}
+                <Panel defaultSize={70} minSize={40}>
+                  <div className="h-full flex flex-col">
+                    <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 flex items-center">
+                      <Code className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Code Editor
+                      </span>
+                      <div className="ml-auto flex items-center space-x-2 z-50">
+                        <select
+                          value={selectedLanguage}
+                          onChange={(e) => setSelectedLanguage(e.target.value)}
+                          className="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-900 rounded px-2 py-1 text-gray-700 dark:text-gray-300"
+                        >
+                          {languageOptions.map((lang) => (
+                            <option key={lang.value} value={lang.value}>
+                              {lang.label}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={showSampleSolution}
+                          className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Show Solution
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-auto bg-gray-50 dark:bg-slate-950 flex flex-col">
+                      {/* Warning banner for protected code */}
+                      <div className="px-4 py-2 bg-amber-100 dark:bg-amber-900 border-b border-amber-200 dark:border-amber-800 flex items-center flex-shrink-0">
+                        <Lock className="w-4 h-4 mr-2 text-amber-600 dark:text-amber-400" />
+                        <span className="text-xs text-amber-800 dark:text-amber-200">
+                          Please do not modify the "Example usage" section. It is required for test case evaluation.
+                        </span>
+                      </div>
+                      <div className="p-4 flex-1 overflow-hidden flex flex-col">
+                        <CodeEditor
+                          value={code}
+                          onChange={setCode}
+                          language={selectedLanguage}
+                          placeholder="Write your code here..."
+                          className="w-full h-full min-h-0 flex-1"
+                          style={{ height: '100%', minHeight: '300px' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Panel>
+
+                {/* Vertical Resize Handle */}
+                <PanelResizeHandle className="h-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors" />
+
+                {/* Output Panel - Bottom Right */}
+                <Panel defaultSize={30} minSize={20}>
+                  <div className="h-full flex flex-col">
+                    <div className="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Output
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={customTestCase}
+                          onChange={(e) => setCustomTestCase(e.target.value)}
+                          placeholder='Enter custom test case e.g. {"nums":[1,2,3],"target":3}'
+                          className="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-900 rounded px-2 py-1 text-gray-700 dark:text-gray-300 w-64"
+                        />
+                        <button
+                          onClick={runCustomTestCase}
+                          disabled={isRunning || isSubmitting || !customTestCase}
+                          className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Run Custom Test
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-auto p-4 bg-gray-900 text-green-400 font-mono text-sm whitespace-pre">
+                      {output || "Run your code to see the output..."}
+                    </div>
+                  </div>
+                </Panel>
+              </PanelGroup>
             </div>
           </Panel>
         </PanelGroup>
@@ -1039,55 +1124,91 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
         </p>
       </Modal>
 
-      {/* Success Modal - Updated */}
+      {/* Success Modal - Redesigned */}
       <Modal
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
-        title="Test Passed!"
+        title="Challenge Completed! 🎉"
       >
         <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-            <svg
-              className="h-6 w-6 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 260, 
+                damping: 20,
+                delay: 0.1 
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 13l4 4L19 7"
-              ></path>
-            </svg>
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </motion.div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            Congratulations! You&apos;ve successfully completed this challenge.
-          </p>
-          <div className="mt-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Time taken: {30 * 60 - timeLeft} seconds
-            </p>
-            <div className="mt-6 flex justify-center space-x-4">
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-xl font-bold text-gray-900 dark:text-white mb-2"
+          >
+            Excellent work!
+          </motion.h3>
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-gray-600 dark:text-gray-300 mb-4"
+          >
+            You've successfully completed the {question.title} challenge.
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6"
+          >
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400">Time taken:</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">
+                {formatTime(completionTime)}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm mt-2">
+              <span className="text-gray-500 dark:text-gray-400">Difficulty:</span>
+              <span className={`font-medium ${
+                question.difficulty === "Easy"
+                  ? "text-green-600"
+                  : question.difficulty === "Medium"
+                    ? "text-yellow-600"
+                    : "text-red-600"
+              }`}>
+                {question.difficulty}
+              </span>
+            </div>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-6 flex justify-center space-x-4"
+          >
+            <button
+              onClick={() => router.push(`/interview/${params.id}`)}
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Return to Challenges
+            </button>
+            {question && question.id < codingQuestions.length && (
               <button
-                onClick={() => router.push(`/interview/${params.id}`)}
+                onClick={() =>
+                  router.push(`/interview/question/${question.id + 1}`)
+                }
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
               >
-                Return to Challenges
+                Next Challenge
               </button>
-              {question && question.id < codingQuestions.length && (
-                <button
-                  onClick={() =>
-                    router.push(`/interview/question/${question.id + 1}`)
-                  }
-                  className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                >
-                  Next Question
-                </button>
-              )}
-            </div>
-          </div>
+            )}
+          </motion.div>
         </div>
       </Modal>
     </div>

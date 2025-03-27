@@ -10,6 +10,7 @@ type CodeEditorProps = {
   language: string;
   placeholder?: string;
   className?: string;
+  style?: React.CSSProperties;
 };
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -18,6 +19,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   language,
   placeholder = "Enter your code here...",
   className = "",
+  style = {},
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false);
   
@@ -44,7 +46,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   return (
-    <div className={`relative font-mono text-sm ${className}`}>
+    <div className={`relative font-mono text-sm ${className}`} style={style}>
       <Editor
         height="100%"
         width="100%"
