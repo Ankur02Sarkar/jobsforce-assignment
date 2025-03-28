@@ -26,24 +26,26 @@ const CodeReviewPage = () => {
   const searchParams = useSearchParams();
   const id = Number(params.id);
   const interviewIdParam = searchParams.get("interviewId");
-  
+
   // Only pass a valid MongoDB ObjectId to the API
-  const interviewId = isValidObjectId(interviewIdParam) ? interviewIdParam : null;
+  const interviewId = isValidObjectId(interviewIdParam)
+    ? interviewIdParam
+    : null;
 
   // Get solution data from Zustand store
-  const { 
-    code, 
-    language, 
-    problemStatement, 
-    questionTitle, 
-    questionId, 
+  const {
+    code,
+    language,
+    problemStatement,
+    questionTitle,
+    questionId,
     problemType,
     solutionHint,
     // Add analysis methods from store
     setAnalysisResult: storeAnalysisResult,
     setComplexityResult: storeComplexityResult,
     setOptimizationResult: storeOptimizationResult,
-    getResultsForInterview
+    getResultsForInterview,
   } = useSolutionStore();
 
   // State variables
@@ -51,7 +53,9 @@ const CodeReviewPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<string>("");
   const [optimizedCode, setOptimizedCode] = useState<string>("");
-  const [optimizationFocus, setOptimizationFocus] = useState<"time" | "space">("time");
+  const [optimizationFocus, setOptimizationFocus] = useState<"time" | "space">(
+    "time",
+  );
   const [hasRunAnalysis, setHasRunAnalysis] = useState<{
     analyze: boolean;
     complexity: boolean;
@@ -61,17 +65,18 @@ const CodeReviewPage = () => {
   // Effect to load stored results when tab changes
   useEffect(() => {
     if (!interviewId) return;
-    
+
     const storedResults = getResultsForInterview(interviewId);
     if (!storedResults) return;
-    
+
     // Update hasRunAnalysis based on stored results
-    setHasRunAnalysis(prev => ({
+    setHasRunAnalysis((prev) => ({
       analyze: !!storedResults.analyze?.formattedAnalysis || prev.analyze,
-      complexity: !!storedResults.complexity?.formattedAnalysis || prev.complexity,
-      optimize: !!storedResults.optimize?.formattedAnalysis || prev.optimize
+      complexity:
+        !!storedResults.complexity?.formattedAnalysis || prev.complexity,
+      optimize: !!storedResults.optimize?.formattedAnalysis || prev.optimize,
     }));
-    
+
     // Load the appropriate results based on selected tab
     if (selectedTab === "analyze" && storedResults.analyze) {
       if (storedResults.analyze.formattedAnalysis) {
@@ -110,18 +115,20 @@ const CodeReviewPage = () => {
         questionId,
         interviewId,
         codeLength: code.length,
-        interviewIdValid: isValidObjectId(interviewId)
+        interviewIdValid: isValidObjectId(interviewId),
       });
-      
+
       if (!interviewId || !isValidObjectId(interviewId)) {
-        setAnalysisResult("Error: Invalid or missing interview ID. Please return to the challenge and try again.");
+        setAnalysisResult(
+          "Error: Invalid or missing interview ID. Please return to the challenge and try again.",
+        );
         setIsLoading(false);
         return;
       }
-      
+
       // Call the appropriate API endpoint based on the selected tab
       let result;
-      
+
       if (selectedTab === "analyze") {
         result = await apiPost<any>("/api/ai/analyze-solution", {
           code,
@@ -137,13 +144,13 @@ const CodeReviewPage = () => {
             // Format both text analysis and structured algorithm analysis data
             const analysis = result.data.algorithmAnalysis;
             let formattedAnalysis = `<div class="space-y-4">`;
-            
+
             // General analysis text
             formattedAnalysis += `<div class="mb-4">
               <h3 class="text-lg font-medium mb-1">General Analysis</h3>
               <p>${result.data.analysisText}</p>
             </div>`;
-            
+
             // Approach identified
             if (analysis.approachIdentified) {
               formattedAnalysis += `<div class="mb-3">
@@ -151,33 +158,44 @@ const CodeReviewPage = () => {
                 <p>${analysis.approachIdentified}</p>
               </div>`;
             }
-            
+
             // Optimization tips
-            if (analysis.optimizationTips && analysis.optimizationTips.length > 0) {
+            if (
+              analysis.optimizationTips &&
+              analysis.optimizationTips.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Optimization Tips</h3>
                 <ul class="list-disc pl-5 space-y-1">
-                  ${analysis.optimizationTips.map((tip: string) => `<li>${tip}</li>`).join('')}
+                  ${analysis.optimizationTips.map((tip: string) => `<li>${tip}</li>`).join("")}
                 </ul>
               </div>`;
             }
-            
+
             // Edge cases feedback
-            if (analysis.edgeCasesFeedback && analysis.edgeCasesFeedback.length > 0) {
+            if (
+              analysis.edgeCasesFeedback &&
+              analysis.edgeCasesFeedback.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Edge Cases Feedback</h3>
                 <ul class="list-disc pl-5 space-y-1">
-                  ${analysis.edgeCasesFeedback.map((feedback: string) => `<li>${feedback}</li>`).join('')}
+                  ${analysis.edgeCasesFeedback.map((feedback: string) => `<li>${feedback}</li>`).join("")}
                 </ul>
               </div>`;
             }
-            
+
             // Alternative approaches
-            if (analysis.alternativeApproaches && analysis.alternativeApproaches.length > 0) {
+            if (
+              analysis.alternativeApproaches &&
+              analysis.alternativeApproaches.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Alternative Approaches</h3>
                 <div class="space-y-3">
-                  ${analysis.alternativeApproaches.map((approach: any) => `
+                  ${analysis.alternativeApproaches
+                    .map(
+                      (approach: any) => `
                     <div class="bg-gray-50 dark:bg-slate-800 p-3 rounded-md">
                       <div class="font-medium">${approach.description}</div>
                       <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -187,40 +205,42 @@ const CodeReviewPage = () => {
                         <span class="font-medium">Suitability:</span> ${approach.suitability}
                       </div>
                     </div>
-                  `).join('')}
+                  `,
+                    )
+                    .join("")}
                 </div>
               </div>`;
             }
-            
+
             formattedAnalysis += `</div>`;
             setAnalysisResult(formattedAnalysis);
-            
+
             // Store in Zustand and mark as analyzed
             if (interviewId) {
               storeAnalysisResult(interviewId, {
                 analysisText: result.data.analysisText,
                 algorithmAnalysis: result.data.algorithmAnalysis,
-                formattedAnalysis
+                formattedAnalysis,
               });
-              setHasRunAnalysis(prev => ({ ...prev, analyze: true }));
+              setHasRunAnalysis((prev) => ({ ...prev, analyze: true }));
             }
           } else if (result.data.analysisText) {
             // Format existing analysis as a string
             setAnalysisResult(result.data.analysisText);
-            
+
             // Store in Zustand and mark as analyzed
             if (interviewId) {
               storeAnalysisResult(interviewId, {
                 analysisText: result.data.analysisText,
-                formattedAnalysis: result.data.analysisText
+                formattedAnalysis: result.data.analysisText,
               });
-              setHasRunAnalysis(prev => ({ ...prev, analyze: true }));
+              setHasRunAnalysis((prev) => ({ ...prev, analyze: true }));
             }
           } else if (result.data.algorithmAnalysis) {
             // Format structured algorithm analysis data
             const analysis = result.data.algorithmAnalysis;
             let formattedAnalysis = `<div class="space-y-4">`;
-            
+
             // Approach identified
             if (analysis.approachIdentified) {
               formattedAnalysis += `<div class="mb-3">
@@ -228,33 +248,44 @@ const CodeReviewPage = () => {
                 <p>${analysis.approachIdentified}</p>
               </div>`;
             }
-            
+
             // Optimization tips
-            if (analysis.optimizationTips && analysis.optimizationTips.length > 0) {
+            if (
+              analysis.optimizationTips &&
+              analysis.optimizationTips.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Optimization Tips</h3>
                 <ul class="list-disc pl-5 space-y-1">
-                  ${analysis.optimizationTips.map((tip: string) => `<li>${tip}</li>`).join('')}
+                  ${analysis.optimizationTips.map((tip: string) => `<li>${tip}</li>`).join("")}
                 </ul>
               </div>`;
             }
-            
+
             // Edge cases feedback
-            if (analysis.edgeCasesFeedback && analysis.edgeCasesFeedback.length > 0) {
+            if (
+              analysis.edgeCasesFeedback &&
+              analysis.edgeCasesFeedback.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Edge Cases Feedback</h3>
                 <ul class="list-disc pl-5 space-y-1">
-                  ${analysis.edgeCasesFeedback.map((feedback: string) => `<li>${feedback}</li>`).join('')}
+                  ${analysis.edgeCasesFeedback.map((feedback: string) => `<li>${feedback}</li>`).join("")}
                 </ul>
               </div>`;
             }
-            
+
             // Alternative approaches
-            if (analysis.alternativeApproaches && analysis.alternativeApproaches.length > 0) {
+            if (
+              analysis.alternativeApproaches &&
+              analysis.alternativeApproaches.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Alternative Approaches</h3>
                 <div class="space-y-3">
-                  ${analysis.alternativeApproaches.map((approach: any) => `
+                  ${analysis.alternativeApproaches
+                    .map(
+                      (approach: any) => `
                     <div class="bg-gray-50 dark:bg-slate-800 p-3 rounded-md">
                       <div class="font-medium">${approach.description}</div>
                       <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -264,28 +295,29 @@ const CodeReviewPage = () => {
                         <span class="font-medium">Suitability:</span> ${approach.suitability}
                       </div>
                     </div>
-                  `).join('')}
+                  `,
+                    )
+                    .join("")}
                 </div>
               </div>`;
             }
-            
+
             formattedAnalysis += `</div>`;
             setAnalysisResult(formattedAnalysis);
-            
+
             // Store in Zustand and mark as analyzed
             if (interviewId) {
               storeAnalysisResult(interviewId, {
                 algorithmAnalysis: result.data.algorithmAnalysis,
-                formattedAnalysis
+                formattedAnalysis,
               });
-              setHasRunAnalysis(prev => ({ ...prev, analyze: true }));
+              setHasRunAnalysis((prev) => ({ ...prev, analyze: true }));
             }
           } else {
             setAnalysisResult("No analysis available");
           }
         }
-      } 
-      else if (selectedTab === "complexity") {
+      } else if (selectedTab === "complexity") {
         result = await apiPost<any>("/api/ai/complexity-analysis", {
           code,
           language,
@@ -295,11 +327,14 @@ const CodeReviewPage = () => {
         });
 
         if (result.success) {
-          if (result.data.complexityAnalysis && typeof result.data.complexityAnalysis === 'object') {
+          if (
+            result.data.complexityAnalysis &&
+            typeof result.data.complexityAnalysis === "object"
+          ) {
             // Format structured complexity analysis data
             const analysis = result.data.complexityAnalysis;
             let formattedAnalysis = `<div class="space-y-4">`;
-            
+
             // General analysis text if available
             if (result.data.analysisText) {
               formattedAnalysis += `<div class="mb-4">
@@ -307,68 +342,79 @@ const CodeReviewPage = () => {
                 <p>${result.data.analysisText}</p>
               </div>`;
             }
-            
+
             // Time complexity
             if (analysis.timeComplexity) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Time Complexity</h3>`;
-              
-              if (typeof analysis.timeComplexity === 'string') {
+
+              if (typeof analysis.timeComplexity === "string") {
                 formattedAnalysis += `<p class="font-mono bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded inline-block">${analysis.timeComplexity}</p>`;
               } else {
                 // Handle structured time complexity object with best, average, worst cases
                 formattedAnalysis += `<div class="grid grid-cols-3 gap-2 mb-2">
                   <div class="bg-gray-50 dark:bg-slate-800 p-2 rounded">
                     <div class="text-xs text-gray-500 dark:text-gray-400">Best Case</div>
-                    <div class="font-mono font-medium">${analysis.timeComplexity.bestCase || 'N/A'}</div>
+                    <div class="font-mono font-medium">${analysis.timeComplexity.bestCase || "N/A"}</div>
                   </div>
                   <div class="bg-gray-50 dark:bg-slate-800 p-2 rounded">
                     <div class="text-xs text-gray-500 dark:text-gray-400">Average Case</div>
-                    <div class="font-mono font-medium">${analysis.timeComplexity.averageCase || 'N/A'}</div>
+                    <div class="font-mono font-medium">${analysis.timeComplexity.averageCase || "N/A"}</div>
                   </div>
                   <div class="bg-gray-50 dark:bg-slate-800 p-2 rounded">
                     <div class="text-xs text-gray-500 dark:text-gray-400">Worst Case</div>
-                    <div class="font-mono font-medium">${analysis.timeComplexity.worstCase || 'N/A'}</div>
+                    <div class="font-mono font-medium">${analysis.timeComplexity.worstCase || "N/A"}</div>
                   </div>
                 </div>`;
               }
-              
+
               if (analysis.timeComplexityExplanation) {
                 formattedAnalysis += `<p class="mt-1">${analysis.timeComplexityExplanation}</p>`;
               }
-              
+
               formattedAnalysis += `</div>`;
             }
-            
+
             // Space complexity
             if (analysis.spaceComplexity) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Space Complexity</h3>
                 <p class="font-mono bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded inline-block">${analysis.spaceComplexity}</p>
-                ${analysis.spaceComplexityExplanation ? `<p class="mt-1">${analysis.spaceComplexityExplanation}</p>` : ''}
+                ${analysis.spaceComplexityExplanation ? `<p class="mt-1">${analysis.spaceComplexityExplanation}</p>` : ""}
               </div>`;
             }
-            
+
             // Critical operations if available
-            if (analysis.criticalOperations && analysis.criticalOperations.length > 0) {
+            if (
+              analysis.criticalOperations &&
+              analysis.criticalOperations.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Critical Operations</h3>
                 <div class="space-y-3">
-                  ${analysis.criticalOperations.map((op: any) => `
+                  ${analysis.criticalOperations
+                    .map(
+                      (op: any) => `
                     <div class="bg-gray-50 dark:bg-slate-800 p-3 rounded-md">
                       <div class="font-medium">${op.operation}</div>
                       <div class="text-sm mt-1">${op.impact}</div>
-                      ${op.lineNumbers ? `
+                      ${
+                        op.lineNumbers
+                          ? `
                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          Line${op.lineNumbers.length > 1 ? 's' : ''}: ${op.lineNumbers.join(', ')}
+                          Line${op.lineNumbers.length > 1 ? "s" : ""}: ${op.lineNumbers.join(", ")}
                         </div>
-                      ` : ''}
+                      `
+                          : ""
+                      }
                     </div>
-                  `).join('')}
+                  `,
+                    )
+                    .join("")}
                 </div>
               </div>`;
             }
-            
+
             // Comparison to optimal
             if (analysis.comparisonToOptimal) {
               formattedAnalysis += `<div class="mb-3">
@@ -376,72 +422,74 @@ const CodeReviewPage = () => {
                 <p>${analysis.comparisonToOptimal}</p>
               </div>`;
             }
-            
+
             // Performance bottlenecks if available
-            if (analysis.performanceBottlenecks && analysis.performanceBottlenecks.length > 0) {
+            if (
+              analysis.performanceBottlenecks &&
+              analysis.performanceBottlenecks.length > 0
+            ) {
               formattedAnalysis += `<div class="mb-3">
                 <h3 class="text-lg font-medium mb-1">Performance Bottlenecks</h3>
                 <ul class="list-disc pl-5 space-y-1">
-                  ${analysis.performanceBottlenecks.map((bottleneck: string) => `<li>${bottleneck}</li>`).join('')}
+                  ${analysis.performanceBottlenecks.map((bottleneck: string) => `<li>${bottleneck}</li>`).join("")}
                 </ul>
               </div>`;
             }
-            
+
             formattedAnalysis += `</div>`;
             setAnalysisResult(formattedAnalysis);
-            
+
             // Store in Zustand and mark as analyzed
             if (interviewId) {
               storeComplexityResult(interviewId, {
                 analysisText: result.data.analysisText,
                 complexityAnalysis: result.data.complexityAnalysis,
-                formattedAnalysis
+                formattedAnalysis,
               });
-              setHasRunAnalysis(prev => ({ ...prev, complexity: true }));
+              setHasRunAnalysis((prev) => ({ ...prev, complexity: true }));
             }
           } else if (result.data.analysisText) {
             // Use text analysis if available
             setAnalysisResult(result.data.analysisText);
-            
+
             // Store in Zustand and mark as analyzed
             if (interviewId) {
               storeComplexityResult(interviewId, {
                 analysisText: result.data.analysisText,
-                formattedAnalysis: result.data.analysisText
+                formattedAnalysis: result.data.analysisText,
               });
-              setHasRunAnalysis(prev => ({ ...prev, complexity: true }));
+              setHasRunAnalysis((prev) => ({ ...prev, complexity: true }));
             }
-          } else if (typeof result.data.complexityAnalysis === 'string') {
+          } else if (typeof result.data.complexityAnalysis === "string") {
             // Use string complexity analysis if that's what we got
             setAnalysisResult(result.data.complexityAnalysis);
-            
+
             // Store in Zustand and mark as analyzed
             if (interviewId) {
               storeComplexityResult(interviewId, {
                 complexityAnalysis: result.data.complexityAnalysis,
-                formattedAnalysis: result.data.complexityAnalysis
+                formattedAnalysis: result.data.complexityAnalysis,
               });
-              setHasRunAnalysis(prev => ({ ...prev, complexity: true }));
+              setHasRunAnalysis((prev) => ({ ...prev, complexity: true }));
             }
           } else {
             setAnalysisResult("No complexity analysis available");
           }
         }
-      } 
-      else if (selectedTab === "optimize") {
+      } else if (selectedTab === "optimize") {
         result = await apiPost<any>("/api/ai/optimize-solution", {
           code,
           language,
           problemStatement,
           optimizationFocus,
-          interviewId, 
+          interviewId,
           questionId: questionId || null,
-          solutionHint: solutionHint
+          solutionHint: solutionHint,
         });
 
         if (result.success) {
           let formattedAnalysis = `<div class="space-y-4">`;
-          
+
           // General optimization text
           if (result.data.optimizationText) {
             formattedAnalysis += `<div class="mb-4">
@@ -449,101 +497,126 @@ const CodeReviewPage = () => {
               <p>${result.data.optimizationText}</p>
             </div>`;
           }
-          
+
           // Optimization suggestions and improvements if available
-          if (result.data.optimizationSuggestions && result.data.optimizationSuggestions.improvements) {
-            const improvements = result.data.optimizationSuggestions.improvements;
-            
+          if (
+            result.data.optimizationSuggestions &&
+            result.data.optimizationSuggestions.improvements
+          ) {
+            const improvements =
+              result.data.optimizationSuggestions.improvements;
+
             formattedAnalysis += `<div class="mb-3">
               <h3 class="text-lg font-medium mb-1">Improvements</h3>
               <div class="space-y-3">
-                ${improvements.map((improvement: any) => `
+                ${improvements
+                  .map(
+                    (improvement: any) => `
                   <div class="bg-gray-50 dark:bg-slate-800 p-3 rounded-md">
                     <div class="font-medium">${improvement.description}</div>
-                    ${improvement.complexityBefore && improvement.complexityAfter ? `
+                    ${
+                      improvement.complexityBefore &&
+                      improvement.complexityAfter
+                        ? `
                       <div class="flex items-center mt-2 text-sm">
                         <span class="mr-2">Complexity: </span>
                         <span class="font-mono bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">${improvement.complexityBefore}</span>
                         <span class="mx-2">→</span>
                         <span class="font-mono bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">${improvement.complexityAfter}</span>
                       </div>
-                    ` : ''}
-                    ${improvement.algorithmicChange ? `
+                    `
+                        : ""
+                    }
+                    ${
+                      improvement.algorithmicChange
+                        ? `
                       <div class="text-sm mt-1">
                         <span class="font-medium">Algorithmic Change:</span> ${improvement.algorithmicChange}
                       </div>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                   </div>
-                `).join('')}
+                `,
+                  )
+                  .join("")}
               </div>
             </div>`;
           }
-          
+
           // Improvement points if available from optimizationDetails
-          if (result.data.optimizationDetails && result.data.optimizationDetails.improvementPoints && 
-              result.data.optimizationDetails.improvementPoints.length > 0) {
+          if (
+            result.data.optimizationDetails &&
+            result.data.optimizationDetails.improvementPoints &&
+            result.data.optimizationDetails.improvementPoints.length > 0
+          ) {
             formattedAnalysis += `<div class="mb-3">
               <h3 class="text-lg font-medium mb-1">Improvement Points</h3>
               <ul class="list-disc pl-5 space-y-1">
-                ${result.data.optimizationDetails.improvementPoints.map((point: string) => `<li>${point}</li>`).join('')}
+                ${result.data.optimizationDetails.improvementPoints.map((point: string) => `<li>${point}</li>`).join("")}
               </ul>
             </div>`;
           }
-          
+
           // Expected performance gains if available
-          if (result.data.optimizationDetails && result.data.optimizationDetails.expectedPerformanceGains) {
+          if (
+            result.data.optimizationDetails &&
+            result.data.optimizationDetails.expectedPerformanceGains
+          ) {
             formattedAnalysis += `<div class="mb-3">
               <h3 class="text-lg font-medium mb-1">Expected Performance Gains</h3>
               <p>${result.data.optimizationDetails.expectedPerformanceGains}</p>
             </div>`;
           }
-          
+
           formattedAnalysis += `</div>`;
           setAnalysisResult(formattedAnalysis);
-          
+
           // Check if we have optimized code and set it
-          const optimizedCodeText = result.data.optimizationSuggestions && (
-            typeof result.data.optimizationSuggestions === 'string' 
-              ? result.data.optimizationSuggestions 
-              : result.data.optimizationSuggestions.optimizedCode || result.data.optimizationSuggestions.code || ''
-          );
-            
+          const optimizedCodeText =
+            result.data.optimizationSuggestions &&
+            (typeof result.data.optimizationSuggestions === "string"
+              ? result.data.optimizationSuggestions
+              : result.data.optimizationSuggestions.optimizedCode ||
+                result.data.optimizationSuggestions.code ||
+                "");
+
           if (optimizedCodeText) {
             setOptimizedCode(optimizedCodeText);
           }
-          
+
           // Store in Zustand and mark as analyzed
           if (interviewId) {
             storeOptimizationResult(interviewId, {
               optimizationText: result.data.optimizationText,
               optimizationSuggestions: result.data.optimizationSuggestions,
               formattedAnalysis,
-              optimizedCode: optimizedCodeText
+              optimizedCode: optimizedCodeText,
             });
-            setHasRunAnalysis(prev => ({ ...prev, optimize: true }));
+            setHasRunAnalysis((prev) => ({ ...prev, optimize: true }));
           }
         }
       }
-      
+
       console.log(`${selectedTab} analysis successful:`, result?.success);
-      
     } catch (error) {
       console.error(`Error in ${selectedTab} analysis:`, error);
-      
+
       // Get detailed error message if available
-      let errorMessage = "Error occurred during analysis. Please try again later.";
+      let errorMessage =
+        "Error occurred during analysis. Please try again later.";
       if (error instanceof Error) {
         errorMessage = `Error: ${error.message}`;
-      } else if (typeof error === 'object' && error !== null) {
+      } else if (typeof error === "object" && error !== null) {
         const errorObj = error as any;
         if (errorObj.response?.data?.message) {
           errorMessage = `Server error: ${errorObj.response.data.message}`;
         }
-        
+
         // Log the full error response for debugging
         console.error("Full error response:", errorObj.response?.data);
       }
-      
+
       setAnalysisResult(errorMessage);
     } finally {
       setIsLoading(false);
@@ -574,8 +647,8 @@ const CodeReviewPage = () => {
   };
 
   // Redirect back to questions if code is not available
-  if (!code && typeof window !== 'undefined') {
-    router.push('/interview');
+  if (!code && typeof window !== "undefined") {
+    router.push("/interview");
     return null;
   }
 
@@ -652,16 +725,22 @@ const CodeReviewPage = () => {
               <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden">
                 <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
                   <h2 className="font-medium text-gray-900 dark:text-white">
-                    {selectedTab === "optimize" && optimizedCode 
-                      ? "Optimized Solution" 
+                    {selectedTab === "optimize" && optimizedCode
+                      ? "Optimized Solution"
                       : "Your Solution"}
                   </h2>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">{language}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {language}
+                  </div>
                 </div>
                 <div className="p-4">
                   <div className={styles.editorContainer}>
                     <CodeEditor
-                      value={selectedTab === "optimize" && optimizedCode ? optimizedCode : code}
+                      value={
+                        selectedTab === "optimize" && optimizedCode
+                          ? optimizedCode
+                          : code
+                      }
                       onChange={() => {}} // Read-only
                       language={language}
                       placeholder="Your code will appear here..."
@@ -712,7 +791,9 @@ const CodeReviewPage = () => {
                     <h2 className="font-medium text-gray-900 dark:text-white">
                       Original Solution
                     </h2>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">{language}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {language}
+                    </div>
                   </div>
                   <div className="p-4">
                     <div className={styles.editorContainer}>
@@ -737,10 +818,10 @@ const CodeReviewPage = () => {
                     isLoading
                       ? "bg-gray-400 cursor-not-allowed"
                       : selectedTab === "analyze"
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : selectedTab === "complexity"
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-purple-600 hover:bg-purple-700"
+                        ? "bg-blue-600 hover:bg-blue-700"
+                        : selectedTab === "complexity"
+                          ? "bg-green-600 hover:bg-green-700"
+                          : "bg-purple-600 hover:bg-purple-700"
                   }`}
                 >
                   {isLoading ? (
@@ -753,8 +834,10 @@ const CodeReviewPage = () => {
                       selectedTab === "analyze"
                         ? "Code Analysis"
                         : selectedTab === "complexity"
-                        ? "Complexity Analysis"
-                        : optimizedCode ? "Re-Optimize" : "Optimization"
+                          ? "Complexity Analysis"
+                          : optimizedCode
+                            ? "Re-Optimize"
+                            : "Optimization"
                     }`
                   )}
                 </button>
@@ -768,32 +851,42 @@ const CodeReviewPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden h-full"
-            >
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                <h2 className="font-medium text-gray-900 dark:text-white">
-                  {selectedTab === "analyze"
-                    ? "Code Analysis"
-                    : selectedTab === "complexity"
-                    ? "Complexity Analysis"
-                    : "Optimization Suggestions"}
-                </h2>
-              </div>
-              <div className={`p-4 prose dark:prose-invert max-w-none ${styles.resultContainer}`}>
+              >
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                  <h2 className="font-medium text-gray-900 dark:text-white">
+                    {selectedTab === "analyze"
+                      ? "Code Analysis"
+                      : selectedTab === "complexity"
+                        ? "Complexity Analysis"
+                        : "Optimization Suggestions"}
+                  </h2>
+                </div>
+                <div
+                  className={`p-4 prose dark:prose-invert max-w-none ${styles.resultContainer}`}
+                >
                   {analysisResult ? (
                     // If we have analysis results
-                    analysisResult.startsWith('<div') ? (
+                    analysisResult.startsWith("<div") ? (
                       // If it's already HTML formatted, use dangerouslySetInnerHTML directly
-                      <div dangerouslySetInnerHTML={{ __html: analysisResult }} />
+                      <div
+                        dangerouslySetInnerHTML={{ __html: analysisResult }}
+                      />
                     ) : (
                       // Otherwise format as paragraphs with line breaks
-                <div dangerouslySetInnerHTML={{ __html: analysisResult.replace(/\n/g, "<br />") }} />
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: analysisResult.replace(/\n/g, "<br />"),
+                        }}
+                      />
                     )
                   ) : (
                     // Show placeholder if no results for this tab
-                    <div dangerouslySetInnerHTML={{ __html: getPlaceholderText() }} />
+                    <div
+                      dangerouslySetInnerHTML={{ __html: getPlaceholderText() }}
+                    />
                   )}
-              </div>
-            </motion.div>
+                </div>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -802,4 +895,4 @@ const CodeReviewPage = () => {
   );
 };
 
-export default CodeReviewPage; 
+export default CodeReviewPage;

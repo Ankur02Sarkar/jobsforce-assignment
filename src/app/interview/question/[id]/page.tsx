@@ -62,24 +62,24 @@ Output: [0,1]
 Can you come up with an algorithm that is less than O(n²) time complexity?
     `,
     testCases: [
-      { 
+      {
         input: { nums: [2, 7, 11, 15], target: 9 },
         output: [0, 1],
         displayInput: "nums = [2,7,11,15], target = 9",
-        displayOutput: "[0,1]"
+        displayOutput: "[0,1]",
       },
-      { 
+      {
         input: { nums: [3, 2, 4], target: 6 },
         output: [1, 2],
         displayInput: "nums = [3,2,4], target = 6",
-        displayOutput: "[1,2]"
+        displayOutput: "[1,2]",
       },
-      { 
+      {
         input: { nums: [3, 3], target: 6 },
         output: [0, 1],
         displayInput: "nums = [3,3], target = 6",
-        displayOutput: "[0,1]"
-      }
+        displayOutput: "[0,1]",
+      },
     ],
     startingCode: {
       javascript: `function twoSum(nums, target) {
@@ -152,7 +152,8 @@ public:
     },
     tags: ["Array", "Hash Table"],
     problemType: "Array",
-    solutionHint: "Use a hash map to store previously seen values and their indices for O(1) lookups.",
+    solutionHint:
+      "Use a hash map to store previously seen values and their indices for O(1) lookups.",
   },
   {
     id: 2,
@@ -189,36 +190,36 @@ Output: false
 - s consists of parentheses only '()[]{}'
     `,
     testCases: [
-      { 
+      {
         input: { s: "()" },
         output: true,
         displayInput: 's = "()"',
-        displayOutput: "true"
+        displayOutput: "true",
       },
-      { 
+      {
         input: { s: "()[]{}" },
         output: true,
         displayInput: 's = "()[]{}"',
-        displayOutput: "true"
+        displayOutput: "true",
       },
-      { 
+      {
         input: { s: "(]" },
         output: false,
         displayInput: 's = "(]"',
-        displayOutput: "false"
+        displayOutput: "false",
       },
-      { 
+      {
         input: { s: "([)]" },
         output: false,
         displayInput: 's = "([)]"',
-        displayOutput: "false"
+        displayOutput: "false",
       },
-      { 
+      {
         input: { s: "{[]}" },
         output: true,
         displayInput: 's = "{[]}"',
-        displayOutput: "true"
-      }
+        displayOutput: "true",
+      },
     ],
     startingCode: {
       javascript: `function isValid(s) {
@@ -304,7 +305,8 @@ public:
     },
     tags: ["Stack", "String"],
     problemType: "Stack",
-    solutionHint: "Use a stack to track opening brackets and verify matching closing brackets in the correct order.",
+    solutionHint:
+      "Use a stack to track opening brackets and verify matching closing brackets in the correct order.",
   },
   // ... other questions
 ];
@@ -338,7 +340,7 @@ const Modal = ({
 
   return (
     <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
@@ -433,7 +435,8 @@ const CodeQuestion = () => {
   // Extract runTestCase function from the code
   const extractRunTestCase = (code: string): string => {
     // Using a more compatible regex without the 's' flag
-    const runTestCaseRegex = /\/\/ Example usage[\s\S]*?function runTestCase\([\s\S]*?\)[\s\S]*?\{[\s\S]*?\}|# Example usage[\s\S]*?def runTestCase\([\s\S]*?\):[\s\S]*?(?=\n\n|$)|\/\/ Example usage[\s\S]*?static[\s\S]*?runTestCase\([\s\S]*?\)[\s\S]*?\{[\s\S]*?\}/;
+    const runTestCaseRegex =
+      /\/\/ Example usage[\s\S]*?function runTestCase\([\s\S]*?\)[\s\S]*?\{[\s\S]*?\}|# Example usage[\s\S]*?def runTestCase\([\s\S]*?\):[\s\S]*?(?=\n\n|$)|\/\/ Example usage[\s\S]*?static[\s\S]*?runTestCase\([\s\S]*?\)[\s\S]*?\{[\s\S]*?\}/;
     const match = code.match(runTestCaseRegex);
     return match ? match[0] : "";
   };
@@ -456,14 +459,18 @@ const CodeQuestion = () => {
       }
 
       // Prepare test cases and wrapper code
-      const wrapperCode = generateWrapperCode(code, selectedLanguage, question.testCases);
+      const wrapperCode = generateWrapperCode(
+        code,
+        selectedLanguage,
+        question.testCases,
+      );
 
       // Execute code using Judge0
       const result = await judge0Client.executeCode(
         wrapperCode,
         selectedLanguage,
-        "",  // No stdin needed as inputs are in the wrapper code
-        true
+        "", // No stdin needed as inputs are in the wrapper code
+        true,
       );
 
       processJudge0Result(result);
@@ -478,15 +485,19 @@ const CodeQuestion = () => {
   };
 
   // Generate wrapper code that runs each test case individually
-  const generateWrapperCode = (userCode: string, language: string, testCases: any[]) => {
+  const generateWrapperCode = (
+    userCode: string,
+    language: string,
+    testCases: any[],
+  ) => {
     switch (language) {
-      case 'javascript':
+      case "javascript":
         return `
 ${userCode}
 
 // Test runner
 function runTests() {
-  const testCases = ${JSON.stringify(testCases.map(tc => tc.input))};
+  const testCases = ${JSON.stringify(testCases.map((tc) => tc.input))};
   const results = [];
   
   for (let i = 0; i < testCases.length; i++) {
@@ -511,7 +522,7 @@ function runTests() {
 
 runTests();
 `;
-      case 'python':
+      case "python":
         return `
 ${userCode}
 
@@ -519,7 +530,7 @@ ${userCode}
 import json
 
 def run_tests():
-    test_cases = ${JSON.stringify(testCases.map(tc => tc.input))}
+    test_cases = ${JSON.stringify(testCases.map((tc) => tc.input))}
     results = []
     
     for tc in test_cases:
@@ -568,17 +579,19 @@ run_tests()
       // Create wrapper code for a single test case
       const singleTestCase = {
         input: parsedInput,
-        displayInput: customTestCase
+        displayInput: customTestCase,
       };
-      
-      const wrapperCode = generateWrapperCode(code, selectedLanguage, [singleTestCase]);
+
+      const wrapperCode = generateWrapperCode(code, selectedLanguage, [
+        singleTestCase,
+      ]);
 
       // Check if we have RapidAPI key
       const rapidApiKey = process.env.NEXT_PUBLIC_RAPIDAPI_KEY;
 
       if (!rapidApiKey) {
         // Fallback to mock execution if no API key
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         const mockResult = `Custom Test Case Result:
 Input: ${customTestCase}
 Output: ${Math.random() > 0.5 ? JSON.stringify(question.testCases[0].output) : "Error: Runtime error"}`;
@@ -592,12 +605,11 @@ Output: ${Math.random() > 0.5 ? JSON.stringify(question.testCases[0].output) : "
         wrapperCode,
         selectedLanguage,
         "",
-        true
+        true,
       );
 
       // Process custom test case result
       processCustomTestResult(result, parsedInput);
-      
     } catch (error) {
       console.error("Error running custom test:", error);
       setOutput(
@@ -635,18 +647,19 @@ Output: ${Math.random() > 0.5 ? JSON.stringify(question.testCases[0].output) : "
     try {
       const output = result.stdout || "[]";
       const testResults = JSON.parse(output);
-      
+
       // Format test case results
       const testCaseResults = question?.testCases
         .map((tc, idx) => {
           const testResult = testResults[idx];
-          const passed = JSON.stringify(testResult.output) === JSON.stringify(tc.output);
-          
+          const passed =
+            JSON.stringify(testResult.output) === JSON.stringify(tc.output);
+
           return `Test Case ${idx + 1}:
 Input: ${tc.displayInput}
 Expected: ${tc.displayOutput}
 Your output: ${JSON.stringify(testResult.output)}
-${testResult.error ? `Error: ${testResult.error}` : ''}
+${testResult.error ? `Error: ${testResult.error}` : ""}
 Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
         })
         .join("\n\n");
@@ -654,25 +667,29 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       setOutput(`Test Results:\n\n${testCaseResults}`);
 
       // Check if all test cases passed
-      const allPassed = testResults.every((res: any, idx: number) => 
-        JSON.stringify(res.output) === JSON.stringify(question?.testCases[idx].output)
+      const allPassed = testResults.every(
+        (res: any, idx: number) =>
+          JSON.stringify(res.output) ===
+          JSON.stringify(question?.testCases[idx].output),
       );
-      
+
       console.log("Test run results:", testCaseResults);
       if (allPassed) {
         // Calculate completion time
         const completionTime = 30 * 60 - timeLeft;
         setCompletionTime(completionTime);
-        
+
         // Save the successful submission to the database
         saveSubmissionToDatabase(completionTime);
-        
+
         setIsSuccessModalOpen(true);
         triggerSuccessConfetti();
       }
     } catch (error) {
       console.error("Error parsing test results:", error);
-      setOutput(`Error parsing test results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`);
+      setOutput(
+        `Error parsing test results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`,
+      );
     }
   };
 
@@ -694,16 +711,16 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
     try {
       const output = result.stdout || "[]";
       const testResults = JSON.parse(output);
-      
+
       if (testResults.length > 0) {
         const testResult = testResults[0];
-        
+
         const formattedResult = `Custom Test Case Result:
 Input: ${JSON.stringify(input)}
 Output: ${JSON.stringify(testResult.output)}
-${testResult.error ? `Error: ${testResult.error}` : ''}
-Execution Time: ${result.time || 'N/A'}s
-Memory Used: ${result.memory || 'N/A'} KB`;
+${testResult.error ? `Error: ${testResult.error}` : ""}
+Execution Time: ${result.time || "N/A"}s
+Memory Used: ${result.memory || "N/A"} KB`;
 
         setOutput(formattedResult);
       } else {
@@ -711,7 +728,9 @@ Memory Used: ${result.memory || 'N/A'} KB`;
       }
     } catch (error) {
       console.error("Error parsing custom test result:", error);
-      setOutput(`Error parsing test results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`);
+      setOutput(
+        `Error parsing test results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`,
+      );
     }
   };
 
@@ -727,31 +746,34 @@ Memory Used: ${result.memory || 'N/A'} KB`;
       return {
         input: tc.input,
         expected: tc.output,
-        output: passed ? tc.output : (idx % 2 === 0 ? [] : [1, 0]),
-        passed
+        output: passed ? tc.output : idx % 2 === 0 ? [] : [1, 0],
+        passed,
       };
     });
 
-    const formattedResults = testResults.map((result, idx) => 
-      `Test Case ${idx + 1}:
+    const formattedResults = testResults
+      .map(
+        (result, idx) =>
+          `Test Case ${idx + 1}:
 Input: ${question.testCases[idx].displayInput}
 Expected: ${question.testCases[idx].displayOutput}
 Your output: ${JSON.stringify(result.output)}
-Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
-    ).join("\n\n");
+Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
+      )
+      .join("\n\n");
 
     setOutput(`Test Results:\n\n${formattedResults}`);
     console.log("Mock execution results:", formattedResults);
 
     // Only show success modal if all test cases pass
-    if (testResults.every(r => r.passed)) {
+    if (testResults.every((r) => r.passed)) {
       // Calculate completion time
       const completionTime = 30 * 60 - timeLeft;
       setCompletionTime(completionTime);
-      
+
       // Save the successful submission to the database
       saveSubmissionToDatabase(completionTime);
-      
+
       setIsSuccessModalOpen(true);
       triggerSuccessConfetti();
     }
@@ -773,13 +795,17 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
         return;
       }
 
-      const wrapperCode = generateWrapperCode(code, selectedLanguage, question.testCases);
+      const wrapperCode = generateWrapperCode(
+        code,
+        selectedLanguage,
+        question.testCases,
+      );
 
       const result = await judge0Client.executeCode(
         wrapperCode,
         selectedLanguage,
         "",
-        true
+        true,
       );
 
       processSubmissionResult(result);
@@ -816,39 +842,44 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     try {
       const output = result.stdout || "[]";
       const testResults = JSON.parse(output);
-      
+
       const testCaseResults = question?.testCases
         .map((tc, idx) => {
           const testResult = testResults[idx];
-          const passed = JSON.stringify(testResult.output) === JSON.stringify(tc.output);
-          
+          const passed =
+            JSON.stringify(testResult.output) === JSON.stringify(tc.output);
+
           return `Test Case ${idx + 1}:
 Input: ${tc.displayInput}
 Expected: ${tc.displayOutput}
 Your output: ${JSON.stringify(testResult.output)}
-${testResult.error ? `Error: ${testResult.error}` : ''}
+${testResult.error ? `Error: ${testResult.error}` : ""}
 Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
         })
         .join("\n\n");
 
-      const allPassed = testResults.every((res: any, idx: number) => 
-        JSON.stringify(res.output) === JSON.stringify(question?.testCases[idx].output)
+      const allPassed = testResults.every(
+        (res: any, idx: number) =>
+          JSON.stringify(res.output) ===
+          JSON.stringify(question?.testCases[idx].output),
       );
 
-      setOutput(`Submission Results:\n\n${testCaseResults}\n\nExecution Time: ${result.time}s\nMemory Used: ${result.memory} KB`);
-      
+      setOutput(
+        `Submission Results:\n\n${testCaseResults}\n\nExecution Time: ${result.time}s\nMemory Used: ${result.memory} KB`,
+      );
+
       console.log("Submission results:", testCaseResults);
       if (allPassed) {
         // Calculate completion time
         const completionTime = 30 * 60 - timeLeft;
         setCompletionTime(completionTime);
-        
+
         // Save the successful submission to the database
         saveSubmissionToDatabase(completionTime);
-        
+
         setIsSuccessModalOpen(true);
         triggerSuccessConfetti();
-        
+
         // Clear timer as test is completed
         if (timerRef.current) {
           clearTimeout(timerRef.current);
@@ -856,7 +887,9 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       }
     } catch (error) {
       console.error("Error parsing submission results:", error);
-      setOutput(`Error parsing submission results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`);
+      setOutput(
+        `Error parsing submission results: ${error instanceof Error ? error.message : "Unknown error"}\n\nRaw output: ${result.stdout}`,
+      );
     }
   };
 
@@ -864,31 +897,31 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
   const saveSubmissionToDatabase = async (completionTime: number) => {
     console.log("Saving Submission to database...");
     if (!question) return;
-    
+
     try {
       // Get the interview ID from local storage or query params
       // This assumes you're storing the current interview ID when navigating to this page
       let interviewId;
-      
+
       // Try to get interviewId from localStorage
-      if (typeof window !== 'undefined') {
-        interviewId = localStorage.getItem('currentInterviewId');
+      if (typeof window !== "undefined") {
+        interviewId = localStorage.getItem("currentInterviewId");
       }
-      
+
       // If interviewId is not in localStorage, check URL search params
-      if (!interviewId && typeof window !== 'undefined') {
+      if (!interviewId && typeof window !== "undefined") {
         const urlParams = new URLSearchParams(window.location.search);
-        interviewId = urlParams.get('interviewId');
+        interviewId = urlParams.get("interviewId");
       }
-      
+
       // If still no interviewId, we can't proceed
       if (!interviewId || !isValidObjectId(interviewId)) {
         console.error("No valid interview ID found - cannot save results");
         return;
       }
-      
+
       console.log("Using interview ID:", interviewId);
-      
+
       // First, fetch the current interview to get existing questions
       interface InterviewResponse {
         success: boolean;
@@ -900,24 +933,26 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
             code?: string; // Add code field to store the solution code
             language?: string; // Add language field to store the programming language
             score?: number;
-            questionId?: number;  // Add questionId to track unique questions
-            timeTaken?: number;   // Add timeTaken to track completion time per question
+            questionId?: number; // Add questionId to track unique questions
+            timeTaken?: number; // Add timeTaken to track completion time per question
           }>;
           [key: string]: any; // For other fields we don't need here
         };
       }
-      
-      const currentInterviewResponse = await apiGet<InterviewResponse>(`/api/interviews/${interviewId}`);
+
+      const currentInterviewResponse = await apiGet<InterviewResponse>(
+        `/api/interviews/${interviewId}`,
+      );
       if (!currentInterviewResponse.success) {
         throw new Error("Failed to fetch current interview");
       }
-      
+
       // Get existing questions or initialize empty array
       const existingQuestions = currentInterviewResponse.data.questions || [];
-      
+
       // Format completion time for display
       const formattedTime = formatTime(completionTime);
-      
+
       // Create new question object
       const newQuestion = {
         question: question.title,
@@ -928,14 +963,14 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
         questionId: question.id, // Store the question ID to track duplicates
         timeTaken: completionTime, // Store the time taken to complete the question
       };
-      
+
       // Check if this question already exists in the array
-      const questionIndex = existingQuestions.findIndex(q => 
-        q.questionId === question.id || q.question === question.title
+      const questionIndex = existingQuestions.findIndex(
+        (q) => q.questionId === question.id || q.question === question.title,
       );
-      
+
       let updatedQuestions;
-      
+
       if (questionIndex >= 0) {
         // Question already exists, update it
         console.log(`Question "${question.title}" already exists, updating it`);
@@ -946,22 +981,25 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
         console.log(`Adding new question "${question.title}"`);
         updatedQuestions = [...existingQuestions, newQuestion];
       }
-      
+
       // Call the API to update the interview record
       // Also update the status to "completed" since the user has successfully completed a question
-      const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
-        status: "completed",
-        questions: updatedQuestions,
-        feedback: `Successfully completed ${question.title} in ${formattedTime}.`
-      });
-      
+      const response = await apiPut<InterviewResponse>(
+        `/api/interviews/${interviewId}`,
+        {
+          status: "completed",
+          questions: updatedQuestions,
+          feedback: `Successfully completed ${question.title} in ${formattedTime}.`,
+        },
+      );
+
       console.log("Submission saved successfully:", response);
-      
+
       // Store interviewId and lastCompletedQuestion for next page
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('lastCompletedQuestion', question.title);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("lastCompletedQuestion", question.title);
         // Make sure currentInterviewId is set for the return journey
-        localStorage.setItem('currentInterviewId', interviewId);
+        localStorage.setItem("currentInterviewId", interviewId);
       }
     } catch (error) {
       console.error("Error saving submission to database:", error);
@@ -978,36 +1016,39 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
 
     // For demo purposes, we'll assume 70% chance of success
     const success = Math.random() > 0.3;
-    
+
     const testResults = question.testCases.map((tc, idx) => {
-      const passed = success || Math.random() > 0.3; 
+      const passed = success || Math.random() > 0.3;
       return {
         input: tc.input,
         expected: tc.output,
-        output: passed ? tc.output : (idx % 2 === 0 ? [] : [1, 0]),
-        passed
+        output: passed ? tc.output : idx % 2 === 0 ? [] : [1, 0],
+        passed,
       };
     });
 
-    const formattedResults = testResults.map((result, idx) => 
-      `Test Case ${idx + 1}:
+    const formattedResults = testResults
+      .map(
+        (result, idx) =>
+          `Test Case ${idx + 1}:
 Input: ${question.testCases[idx].displayInput}
 Expected: ${question.testCases[idx].displayOutput}
 Your output: ${JSON.stringify(result.output)}
-Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
-    ).join("\n\n");
+Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
+      )
+      .join("\n\n");
 
     setOutput(`Submission Results:\n\n${formattedResults}`);
     console.log("Submission results:", formattedResults);
 
-    if (testResults.every(r => r.passed)) {
+    if (testResults.every((r) => r.passed)) {
       // Calculate completion time
       const completionTime = 30 * 60 - timeLeft;
       setCompletionTime(completionTime);
-      
+
       // Save the successful submission to the database
       saveSubmissionToDatabase(completionTime);
-      
+
       setIsSuccessModalOpen(true);
       triggerSuccessConfetti();
 
@@ -1025,15 +1066,15 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
       origin: { y: 0.7 },
       zIndex: 5000,
     };
-    
+
     function fire(particleRatio: number, opts: any) {
       confetti({
         ...defaults,
         ...opts,
-        particleCount: Math.floor(count * particleRatio)
+        particleCount: Math.floor(count * particleRatio),
       });
     }
-    
+
     fire(0.25, {
       spread: 26,
       startVelocity: 55,
@@ -1044,13 +1085,13 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
     fire(0.35, {
       spread: 100,
       decay: 0.91,
-      scalar: 0.8
+      scalar: 0.8,
     });
     fire(0.1, {
       spread: 120,
       startVelocity: 25,
       decay: 0.92,
-      scalar: 1.2
+      scalar: 1.2,
     });
     fire(0.1, {
       spread: 120,
@@ -1060,11 +1101,19 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
 
   // Helper function to show sample solution
   const showSampleSolution = () => {
-    if (question?.sampleSolution && question.sampleSolution[selectedLanguage as keyof typeof question.sampleSolution]) {
-      const solutionCode = question.sampleSolution[selectedLanguage as keyof typeof question.sampleSolution];
+    if (
+      question?.sampleSolution &&
+      question.sampleSolution[
+        selectedLanguage as keyof typeof question.sampleSolution
+      ]
+    ) {
+      const solutionCode =
+        question.sampleSolution[
+          selectedLanguage as keyof typeof question.sampleSolution
+        ];
       const currentCode = code;
       const runTestCasePart = extractRunTestCase(currentCode);
-      
+
       // Merge the solution with the runTestCase function
       if (runTestCasePart) {
         setCode(solutionCode + "\n\n" + runTestCasePart);
@@ -1211,7 +1260,8 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
                       <div className="px-4 py-2 bg-amber-100 dark:bg-amber-900 border-b border-amber-200 dark:border-amber-800 flex items-center flex-shrink-0">
                         <Lock className="w-4 h-4 mr-2 text-amber-600 dark:text-amber-400" />
                         <span className="text-xs text-amber-800 dark:text-amber-200">
-                          Please do not modify the "Example usage" section. It is required for test case evaluation.
+                          Please do not modify the "Example usage" section. It
+                          is required for test case evaluation.
                         </span>
                       </div>
                       <div className="p-4 flex-1 overflow-hidden flex flex-col">
@@ -1221,7 +1271,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
                           language={selectedLanguage}
                           placeholder="Write your code here..."
                           className="w-full h-full min-h-0 flex-1"
-                          style={{ height: '100%', minHeight: '300px' }}
+                          style={{ height: "100%", minHeight: "300px" }}
                         />
                       </div>
                     </div>
@@ -1248,7 +1298,9 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
                         />
                         <button
                           onClick={runCustomTestCase}
-                          disabled={isRunning || isSubmitting || !customTestCase}
+                          disabled={
+                            isRunning || isSubmitting || !customTestCase
+                          }
                           className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Run Custom Test
@@ -1289,11 +1341,11 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 260, 
+              transition={{
+                type: "spring",
+                stiffness: 260,
                 damping: 20,
-                delay: 0.1 
+                delay: 0.1,
               }}
             >
               <CheckCircle className="h-10 w-10 text-green-600" />
@@ -1307,7 +1359,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
           >
             Excellent work!
           </motion.h3>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -1315,32 +1367,38 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
           >
             You've successfully completed the {question.title} challenge.
           </motion.p>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6"
           >
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">Time taken:</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                Time taken:
+              </span>
               <span className="font-medium text-gray-800 dark:text-gray-200">
                 {formatTime(completionTime)}
               </span>
             </div>
             <div className="flex justify-between text-sm mt-2">
-              <span className="text-gray-500 dark:text-gray-400">Difficulty:</span>
-              <span className={`font-medium ${
-                question.difficulty === "Easy"
-                  ? "text-green-600"
-                  : question.difficulty === "Medium"
-                    ? "text-yellow-600"
-                    : "text-red-600"
-              }`}>
+              <span className="text-gray-500 dark:text-gray-400">
+                Difficulty:
+              </span>
+              <span
+                className={`font-medium ${
+                  question.difficulty === "Easy"
+                    ? "text-green-600"
+                    : question.difficulty === "Medium"
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                }`}
+              >
                 {question.difficulty}
               </span>
             </div>
           </motion.div>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -1350,20 +1408,22 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
               onClick={() => {
                 // Get the interviewId from localStorage or URL params
                 let interviewId;
-                if (typeof window !== 'undefined') {
-                  interviewId = localStorage.getItem('currentInterviewId');
+                if (typeof window !== "undefined") {
+                  interviewId = localStorage.getItem("currentInterviewId");
                   if (!interviewId) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    interviewId = urlParams.get('interviewId');
+                    const urlParams = new URLSearchParams(
+                      window.location.search,
+                    );
+                    interviewId = urlParams.get("interviewId");
                   }
                 }
-                
+
                 // Navigate to the interview detail page using the correct ID
                 if (interviewId) {
                   router.push(`/interview/${interviewId}`);
                 } else {
                   // Fallback to interviews list if no ID found
-                  router.push('/interview');
+                  router.push("/interview");
                 }
               }}
               className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md transition-colors"
@@ -1374,34 +1434,43 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
               onClick={() => {
                 // Navigate to code review page with question id and interview id
                 let interviewId;
-                if (typeof window !== 'undefined') {
-                  interviewId = localStorage.getItem('currentInterviewId');
+                if (typeof window !== "undefined") {
+                  interviewId = localStorage.getItem("currentInterviewId");
                   if (!interviewId) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    interviewId = urlParams.get('interviewId');
+                    const urlParams = new URLSearchParams(
+                      window.location.search,
+                    );
+                    interviewId = urlParams.get("interviewId");
                   }
-                  
+
                   // Only proceed with valid ObjectId
                   if (!isValidObjectId(interviewId)) {
-                    console.warn("Invalid interview ID for code review:", interviewId);
-                    alert("Cannot access code review: Invalid interview ID. Please start a new interview session.");
+                    console.warn(
+                      "Invalid interview ID for code review:",
+                      interviewId,
+                    );
+                    alert(
+                      "Cannot access code review: Invalid interview ID. Please start a new interview session.",
+                    );
                     return;
                   }
-                  
+
                   // Save solution data to Zustand store
                   setSolutionData({
                     code,
                     language: selectedLanguage,
-                    problemStatement: question?.fullDescription || '',
-                    questionTitle: question?.title || '',
-                    questionId: question?.id.toString() || '',
-                    problemType: question?.problemType || '',
-                    solutionHint: question?.solutionHint || '',
+                    problemStatement: question?.fullDescription || "",
+                    questionTitle: question?.title || "",
+                    questionId: question?.id.toString() || "",
+                    problemType: question?.problemType || "",
+                    solutionHint: question?.solutionHint || "",
                   });
                 }
-                
+
                 // Navigate to code review page
-                router.push(`/interview/code-review/${question.id}?interviewId=${interviewId || ''}`);
+                router.push(
+                  `/interview/code-review/${question.id}?interviewId=${interviewId || ""}`,
+                );
               }}
               className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center"
             >
@@ -1413,15 +1482,19 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
                 onClick={() => {
                   // Get interviewId before navigating to next question
                   let interviewId;
-                  if (typeof window !== 'undefined') {
-                    interviewId = localStorage.getItem('currentInterviewId');
+                  if (typeof window !== "undefined") {
+                    interviewId = localStorage.getItem("currentInterviewId");
                     if (!interviewId) {
-                      const urlParams = new URLSearchParams(window.location.search);
-                      interviewId = urlParams.get('interviewId');
+                      const urlParams = new URLSearchParams(
+                        window.location.search,
+                      );
+                      interviewId = urlParams.get("interviewId");
                     }
-                    
+
                     // Navigate to next question with interviewId
-                    router.push(`/interview/question/${question.id + 1}?interviewId=${interviewId}`);
+                    router.push(
+                      `/interview/question/${question.id + 1}?interviewId=${interviewId}`,
+                    );
                   } else {
                     router.push(`/interview/question/${question.id + 1}`);
                   }

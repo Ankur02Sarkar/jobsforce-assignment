@@ -24,24 +24,24 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   readOnly = false,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false);
-  
+
   // Map language values to Monaco's language identifiers
   const getMonacoLanguage = (lang: string) => {
     const languageMap: Record<string, string> = {
       javascript: "javascript",
       python: "python",
       java: "java",
-      cpp: "cpp"
+      cpp: "cpp",
     };
-    
+
     return languageMap[lang] || "javascript";
   };
-  
+
   // Handle editor initialization
   const handleEditorDidMount = () => {
     setIsEditorReady(true);
   };
-  
+
   // Handle value change
   const handleEditorChange = (value: string | undefined) => {
     onChange(value || "");
@@ -69,7 +69,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           readOnly: readOnly,
         }}
       />
-      
+
       {!isEditorReady && !value && (
         <div className="absolute inset-0 flex items-center justify-center text-gray-400">
           {placeholder}

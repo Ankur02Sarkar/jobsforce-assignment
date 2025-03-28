@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 // Analysis results types
 type AnalysisResult = {
@@ -55,7 +55,10 @@ interface SolutionState {
   // Methods to set analysis results
   setAnalysisResult: (interviewId: string, result: AnalysisResult) => void;
   setComplexityResult: (interviewId: string, result: ComplexityResult) => void;
-  setOptimizationResult: (interviewId: string, result: OptimizationResult) => void;
+  setOptimizationResult: (
+    interviewId: string,
+    result: OptimizationResult,
+  ) => void;
   getResultsForInterview: (interviewId: string) => {
     analyze?: AnalysisResult;
     complexity?: ComplexityResult;
@@ -65,15 +68,15 @@ interface SolutionState {
 
 // Create a store for solution data
 export const useSolutionStore = create<SolutionState>((set, get) => ({
-  code: '',
-  language: 'javascript',
-  problemStatement: '',
-  questionTitle: '',
-  questionId: '',
-  problemType: '',
-  solutionHint: '',
+  code: "",
+  language: "javascript",
+  problemStatement: "",
+  questionTitle: "",
+  questionId: "",
+  problemType: "",
+  solutionHint: "",
   analysisResults: {},
-  
+
   setCode: (code) => set({ code }),
   setLanguage: (language) => set({ language }),
   setProblemStatement: (problemStatement) => set({ problemStatement }),
@@ -81,51 +84,54 @@ export const useSolutionStore = create<SolutionState>((set, get) => ({
   setQuestionId: (questionId) => set({ questionId }),
   setProblemType: (problemType) => set({ problemType }),
   setSolutionHint: (solutionHint) => set({ solutionHint }),
-  
+
   // Helper method to set all data at once
   setSolutionData: (data) => set(data),
-  
+
   // Methods to set analysis results
-  setAnalysisResult: (interviewId, result) => set((state) => {
-    const currentResults = state.analysisResults[interviewId] || {};
-    return {
-      analysisResults: {
-        ...state.analysisResults,
-        [interviewId]: {
-          ...currentResults,
-          analyze: result,
-        }
-      }
-    };
-  }),
-  
-  setComplexityResult: (interviewId, result) => set((state) => {
-    const currentResults = state.analysisResults[interviewId] || {};
-    return {
-      analysisResults: {
-        ...state.analysisResults,
-        [interviewId]: {
-          ...currentResults,
-          complexity: result,
-        }
-      }
-    };
-  }),
-  
-  setOptimizationResult: (interviewId, result) => set((state) => {
-    const currentResults = state.analysisResults[interviewId] || {};
-    return {
-      analysisResults: {
-        ...state.analysisResults,
-        [interviewId]: {
-          ...currentResults,
-          optimize: result,
-        }
-      }
-    };
-  }),
-  
+  setAnalysisResult: (interviewId, result) =>
+    set((state) => {
+      const currentResults = state.analysisResults[interviewId] || {};
+      return {
+        analysisResults: {
+          ...state.analysisResults,
+          [interviewId]: {
+            ...currentResults,
+            analyze: result,
+          },
+        },
+      };
+    }),
+
+  setComplexityResult: (interviewId, result) =>
+    set((state) => {
+      const currentResults = state.analysisResults[interviewId] || {};
+      return {
+        analysisResults: {
+          ...state.analysisResults,
+          [interviewId]: {
+            ...currentResults,
+            complexity: result,
+          },
+        },
+      };
+    }),
+
+  setOptimizationResult: (interviewId, result) =>
+    set((state) => {
+      const currentResults = state.analysisResults[interviewId] || {};
+      return {
+        analysisResults: {
+          ...state.analysisResults,
+          [interviewId]: {
+            ...currentResults,
+            optimize: result,
+          },
+        },
+      };
+    }),
+
   getResultsForInterview: (interviewId) => {
     return get().analysisResults[interviewId] || null;
-  }
-})); 
+  },
+}));

@@ -5,10 +5,10 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { apiGet, apiPut } from "@/lib/api";
-import { 
-  ArrowLeft, 
-  CalendarIcon, 
-  ClockIcon, 
+import {
+  ArrowLeft,
+  CalendarIcon,
+  ClockIcon,
   Code,
   ExternalLink,
   PlayCircle,
@@ -17,7 +17,7 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
-  EyeOff
+  EyeOff,
 } from "lucide-react";
 import CodeEditor from "@/components/ui/code-editor";
 
@@ -106,7 +106,7 @@ const getDifficultyColor = (difficulty: string) => {
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
 const InterviewDetailPage = () => {
@@ -115,7 +115,9 @@ const InterviewDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [expandedQuestions, setExpandedQuestions] = useState<{[key: number]: boolean}>({});
+  const [expandedQuestions, setExpandedQuestions] = useState<{
+    [key: number]: boolean;
+  }>({});
   const router = useRouter();
   const params = useParams();
   const interviewId = params.id as string;
@@ -125,8 +127,10 @@ const InterviewDetailPage = () => {
     const fetchInterviewDetails = async () => {
       try {
         setLoading(true);
-        const response = await apiGet<InterviewResponse>(`/api/interviews/${interviewId}`);
-        
+        const response = await apiGet<InterviewResponse>(
+          `/api/interviews/${interviewId}`,
+        );
+
         if (response.success) {
           setInterview(response.data);
         } else {
@@ -148,18 +152,21 @@ const InterviewDetailPage = () => {
   const startInterview = async () => {
     try {
       // Update interview status to 'in progress' or similar
-      const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
-        status: "scheduled" // You might want a different status here
-      });
-      
+      const response = await apiPut<InterviewResponse>(
+        `/api/interviews/${interviewId}`,
+        {
+          status: "scheduled", // You might want a different status here
+        },
+      );
+
       if (response.success) {
         setInterview(response.data);
-        
+
         // Save the interview ID to localStorage before navigating to the question page
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('currentInterviewId', interviewId);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("currentInterviewId", interviewId);
         }
-        
+
         // Navigate to the first question with the interview ID as a query parameter
         router.push(`/interview/question/1?interviewId=${interviewId}`);
       }
@@ -172,10 +179,10 @@ const InterviewDetailPage = () => {
   // When navigating to a specific question, save the interview ID
   const navigateToQuestion = (questionId: number) => {
     // Save current interview ID to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('currentInterviewId', interviewId);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("currentInterviewId", interviewId);
     }
-    
+
     // Navigate to the question with interviewId as a query parameter
     router.push(`/interview/question/${questionId}?interviewId=${interviewId}`);
   };
@@ -184,10 +191,13 @@ const InterviewDetailPage = () => {
   const finishTest = async () => {
     try {
       setUpdating(true);
-      const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
-        status: "completed"
-      });
-      
+      const response = await apiPut<InterviewResponse>(
+        `/api/interviews/${interviewId}`,
+        {
+          status: "completed",
+        },
+      );
+
       if (response.success) {
         setInterview(response.data);
       } else {
@@ -204,15 +214,22 @@ const InterviewDetailPage = () => {
   // Function to end the test (mark as cancelled)
   const endTest = async () => {
     try {
-      if (!confirm("Are you sure you want to cancel this interview? This action cannot be undone.")) {
+      if (
+        !confirm(
+          "Are you sure you want to cancel this interview? This action cannot be undone.",
+        )
+      ) {
         return;
       }
-      
+
       setUpdating(true);
-      const response = await apiPut<InterviewResponse>(`/api/interviews/${interviewId}`, {
-        status: "cancelled"
-      });
-      
+      const response = await apiPut<InterviewResponse>(
+        `/api/interviews/${interviewId}`,
+        {
+          status: "cancelled",
+        },
+      );
+
       if (response.success) {
         setInterview(response.data);
       } else {
@@ -228,19 +245,19 @@ const InterviewDetailPage = () => {
 
   // Function to toggle question expansion
   const toggleQuestion = (index: number) => {
-    setExpandedQuestions(prev => ({
+    setExpandedQuestions((prev) => ({
       ...prev,
-      [index]: !prev[index]
+      [index]: !prev[index],
     }));
   };
 
   // Function to determine the language from code
   const determineLanguage = (code: string): string => {
-    if (code.includes('function') && code.includes(';')) return 'javascript';
-    if (code.includes('def ') && code.includes(':')) return 'python';
-    if (code.includes('class') && code.includes('{')) return 'java';
-    if (code.includes('#include')) return 'cpp';
-    return 'javascript'; // Default
+    if (code.includes("function") && code.includes(";")) return "javascript";
+    if (code.includes("def ") && code.includes(":")) return "python";
+    if (code.includes("class") && code.includes("{")) return "java";
+    if (code.includes("#include")) return "cpp";
+    return "javascript"; // Default
   };
 
   if (loading) {
@@ -256,11 +273,14 @@ const InterviewDetailPage = () => {
   if (error || !interview) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Link href="/interview" className="flex items-center text-blue-600 mb-6">
+        <Link
+          href="/interview"
+          className="flex items-center text-blue-600 mb-6"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Interviews
         </Link>
-        
+
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
           {error || "Interview not found"}
         </div>
@@ -275,28 +295,30 @@ const InterviewDetailPage = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Interviews
         </Link>
-        
+
         {/* Add status control buttons */}
-        {interview && interview.status !== "completed" && interview.status !== "cancelled" && (
-          <div className="flex space-x-3">
-            <button
-              onClick={finishTest}
-              disabled={updating}
-              className="flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-            >
-              <CheckSquare className="w-4 h-4 mr-2" />
-              Finish Test
-            </button>
-            <button
-              onClick={endTest}
-              disabled={updating}
-              className="flex items-center bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-            >
-              <XSquare className="w-4 h-4 mr-2" />
-              End Test
-            </button>
-          </div>
-        )}
+        {interview &&
+          interview.status !== "completed" &&
+          interview.status !== "cancelled" && (
+            <div className="flex space-x-3">
+              <button
+                onClick={finishTest}
+                disabled={updating}
+                className="flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+              >
+                <CheckSquare className="w-4 h-4 mr-2" />
+                Finish Test
+              </button>
+              <button
+                onClick={endTest}
+                disabled={updating}
+                className="flex items-center bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+              >
+                <XSquare className="w-4 h-4 mr-2" />
+                End Test
+              </button>
+            </div>
+          )}
       </div>
 
       <div className="mb-10">
@@ -306,13 +328,19 @@ const InterviewDetailPage = () => {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 {interview?.title}
               </h1>
-              <span className={`ml-3 text-sm font-medium px-2.5 py-0.5 rounded-full ${
-                interview?.status === "completed" ? "bg-green-100 text-green-800" :
-                interview?.status === "scheduled" ? "bg-blue-100 text-blue-800" :
-                interview?.status === "cancelled" ? "bg-red-100 text-red-800" :
-                "bg-yellow-100 text-yellow-800"
-              }`}>
-                {interview?.status.charAt(0).toUpperCase() + interview?.status.slice(1)}
+              <span
+                className={`ml-3 text-sm font-medium px-2.5 py-0.5 rounded-full ${
+                  interview?.status === "completed"
+                    ? "bg-green-100 text-green-800"
+                    : interview?.status === "scheduled"
+                      ? "bg-blue-100 text-blue-800"
+                      : interview?.status === "cancelled"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {interview?.status.charAt(0).toUpperCase() +
+                  interview?.status.slice(1)}
               </span>
             </div>
             <p className="text-gray-600 mt-2">
@@ -400,77 +428,97 @@ const InterviewDetailPage = () => {
         </div>
       )}
 
-      {interview?.status === "completed" && interview.questions && interview.questions.length > 0 && (
-        <div className="mt-12 bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold mb-4">Your Interview Results</h2>
-          
-          <div className="space-y-6">
-            {interview.questions.map((question, index) => (
-              <div key={index} className="bg-gray-50 rounded-md overflow-hidden">
-                <div 
-                  className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100"
-                  onClick={() => toggleQuestion(index)}
+      {interview?.status === "completed" &&
+        interview.questions &&
+        interview.questions.length > 0 && (
+          <div className="mt-12 bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Your Interview Results
+            </h2>
+
+            <div className="space-y-6">
+              {interview.questions.map((question, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 rounded-md overflow-hidden"
                 >
-                  <h3 className="font-medium">Question {index + 1}: {question.question}</h3>
-                  <div className="flex items-center">
-                    {question.score !== undefined && (
-                      <span className="text-sm font-medium mr-3 text-gray-600">
-                        Score: <span className="text-green-600">{question.score}/10</span>
-                      </span>
-                    )}
-                    {question.timeTaken !== undefined && (
-                      <span className="text-sm font-medium mr-3 text-gray-600">
-                        Time: <span className="text-blue-600">{formatTime(question.timeTaken)}</span>
-                      </span>
-                    )}
-                    {expandedQuestions[index] ? 
-                      <ChevronUp className="w-5 h-5 text-gray-500" /> : 
-                      <ChevronDown className="w-5 h-5 text-gray-500" />
-                    }
+                  <div
+                    className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                    onClick={() => toggleQuestion(index)}
+                  >
+                    <h3 className="font-medium">
+                      Question {index + 1}: {question.question}
+                    </h3>
+                    <div className="flex items-center">
+                      {question.score !== undefined && (
+                        <span className="text-sm font-medium mr-3 text-gray-600">
+                          Score:{" "}
+                          <span className="text-green-600">
+                            {question.score}/10
+                          </span>
+                        </span>
+                      )}
+                      {question.timeTaken !== undefined && (
+                        <span className="text-sm font-medium mr-3 text-gray-600">
+                          Time:{" "}
+                          <span className="text-blue-600">
+                            {formatTime(question.timeTaken)}
+                          </span>
+                        </span>
+                      )}
+                      {expandedQuestions[index] ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </div>
                   </div>
+
+                  {expandedQuestions[index] && (
+                    <div className="p-4 pt-0 border-t border-gray-200">
+                      {question.answer ? (
+                        <div className="mt-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-medium text-gray-700">
+                              Your Solution:
+                            </h4>
+                            {question.timeTaken && (
+                              <span className="text-xs font-medium text-gray-500">
+                                Completed in {formatTime(question.timeTaken)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="border rounded overflow-hidden">
+                            <CodeEditor
+                              value={question.answer}
+                              onChange={() => {}}
+                              language={determineLanguage(question.answer)}
+                              placeholder=""
+                              className="w-full h-full"
+                              style={{ height: "250px" }}
+                              readOnly={true}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 italic mt-2">
+                          No answer provided
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                
-                {expandedQuestions[index] && (
-                  <div className="p-4 pt-0 border-t border-gray-200">
-                    {question.answer ? (
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-700">Your Solution:</h4>
-                          {question.timeTaken && (
-                            <span className="text-xs font-medium text-gray-500">
-                              Completed in {formatTime(question.timeTaken)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="border rounded overflow-hidden">
-                          <CodeEditor
-                            value={question.answer}
-                            onChange={() => {}}
-                            language={determineLanguage(question.answer)}
-                            placeholder=""
-                            className="w-full h-full"
-                            style={{ height: '250px' }}
-                            readOnly={true}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 italic mt-2">No answer provided</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          
-          {interview.feedback && (
-            <div className="mt-6 bg-blue-50 p-4 rounded-md">
-              <h3 className="font-medium mb-2">Overall Feedback</h3>
-              <p className="text-gray-800">{interview.feedback}</p>
+              ))}
             </div>
-          )}
-        </div>
-      )}
+
+            {interview.feedback && (
+              <div className="mt-6 bg-blue-50 p-4 rounded-md">
+                <h3 className="font-medium mb-2">Overall Feedback</h3>
+                <p className="text-gray-800">{interview.feedback}</p>
+              </div>
+            )}
+          </div>
+        )}
     </div>
   );
 };

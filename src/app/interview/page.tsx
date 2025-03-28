@@ -41,7 +41,7 @@ const InterviewPage = () => {
       try {
         setLoading(true);
         const response = await apiGet<InterviewsResponse>("/api/interviews");
-        
+
         if (response.success) {
           setInterviews(response.data);
         } else {
@@ -61,15 +61,18 @@ const InterviewPage = () => {
   const handleNewInterview = async () => {
     try {
       setLoading(true);
-      
+
       // Create a new interview
-      const response = await apiPost<{success: boolean; data: Interview}>("/api/interviews", {
-        title: `Mock Interview - ${new Date().toLocaleDateString()}`,
-        date: new Date().toISOString(),
-        status: "pending",
-        duration: 60
-      });
-      
+      const response = await apiPost<{ success: boolean; data: Interview }>(
+        "/api/interviews",
+        {
+          title: `Mock Interview - ${new Date().toLocaleDateString()}`,
+          date: new Date().toISOString(),
+          status: "pending",
+          duration: 60,
+        },
+      );
+
       if (response.success) {
         // Navigate to the new interview page
         router.push(`/interview/${response.data._id}`);
@@ -80,12 +83,12 @@ const InterviewPage = () => {
     } catch (error) {
       console.error("Failed to create interview:", error);
       setError("Failed to create new interview");
-      
+
       // For development/demo: If creating interview fails, still navigate to mock questions
       // with a default interview ID - REMOVE THIS IN PRODUCTION
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('currentInterviewId', '67e5c71fdf9dfab5839347e5'); // Use a known valid ID
-        router.push('/interview/67e5c71fdf9dfab5839347e5');
+      if (typeof window !== "undefined") {
+        localStorage.setItem("currentInterviewId", "67e5c71fdf9dfab5839347e5"); // Use a known valid ID
+        router.push("/interview/67e5c71fdf9dfab5839347e5");
       }
     } finally {
       setLoading(false);
@@ -120,7 +123,7 @@ const InterviewPage = () => {
       </div>
 
       {loading && <p className="text-center py-8">Loading interviews...</p>}
-      
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
           {error}
@@ -129,7 +132,9 @@ const InterviewPage = () => {
 
       {!loading && !error && interviews.length === 0 && (
         <div className="text-center py-16 bg-gray-50 rounded-md">
-          <p className="text-gray-500 mb-4">You haven't taken any interviews yet</p>
+          <p className="text-gray-500 mb-4">
+            You haven't taken any interviews yet
+          </p>
           <button
             onClick={handleNewInterview}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
@@ -152,14 +157,17 @@ const InterviewPage = () => {
                   <span
                     className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusBadgeColor(interview.status)}`}
                   >
-                    {interview.status.charAt(0).toUpperCase() + interview.status.slice(1)}
+                    {interview.status.charAt(0).toUpperCase() +
+                      interview.status.slice(1)}
                   </span>
                   <div className="flex items-center text-gray-500">
                     <ClockIcon className="w-4 h-4 mr-1" />
                     <span className="text-xs">{interview.duration} min</span>
                   </div>
                 </div>
-                <h3 className="font-bold text-lg mb-2 text-gray-900">{interview.title}</h3>
+                <h3 className="font-bold text-lg mb-2 text-gray-900">
+                  {interview.title}
+                </h3>
                 <div className="flex items-center text-gray-600 text-sm">
                   <CalendarIcon className="w-4 h-4 mr-2" />
                   {new Date(interview.date).toLocaleDateString(undefined, {
