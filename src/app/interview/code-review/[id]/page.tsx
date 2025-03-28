@@ -12,13 +12,23 @@ import styles from "./code-review.module.css";
 // Tabs for different analyses
 type AnalysisTab = "analyze" | "complexity" | "optimize";
 
+// Function to check if a string is a valid MongoDB ObjectId format
+function isValidObjectId(id: string | null): boolean {
+  if (!id) return false;
+  // MongoDB ObjectIds are 24 hex characters
+  return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
 // Component for the code review page
 const CodeReviewPage = () => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = Number(params.id);
-  const interviewId = searchParams.get("interviewId");
+  const interviewIdParam = searchParams.get("interviewId");
+  
+  // Only pass a valid MongoDB ObjectId to the API
+  const interviewId = isValidObjectId(interviewIdParam) ? interviewIdParam : null;
 
   // Get solution data from Zustand store
   const { 
@@ -48,10 +58,17 @@ const CodeReviewPage = () => {
       // For debugging
       console.log("Analysis request with:", {
         tab: selectedTab,
-        problemId: id.toString(),
         questionId,
-        interviewId
+        interviewId,
+        codeLength: code.length,
+        interviewIdValid: isValidObjectId(interviewId)
       });
+      
+      if (!interviewId || !isValidObjectId(interviewId)) {
+        setAnalysisResult("Error: Invalid or missing interview ID. Please return to the challenge and try again.");
+        setIsLoading(false);
+        return;
+      }
       
       // Call the appropriate API endpoint based on the selected tab
       let result;
@@ -61,9 +78,8 @@ const CodeReviewPage = () => {
           code,
           language,
           problemStatement,
-          problemId: id.toString(),
           interviewId,
-          questionId: questionId,
+          questionId: questionId || null,
         });
 
         if (result.success) {
@@ -75,9 +91,8 @@ const CodeReviewPage = () => {
           code,
           language,
           problemType,
-          problemId: id.toString(),
           interviewId,
-          questionId: questionId,
+          questionId: questionId || null,
         });
 
         if (result.success) {
@@ -90,9 +105,8 @@ const CodeReviewPage = () => {
           language,
           problemStatement,
           optimizationFocus,
-          problemId: id.toString(),
           interviewId, 
-          questionId: questionId,
+          questionId: questionId || null,
           solutionHint: solutionHint
         });
 
@@ -108,6 +122,9 @@ const CodeReviewPage = () => {
           }
         }
       }
+      
+      console.log(`${selectedTab} analysis successful:`, result?.success);
+      
     } catch (error) {
       console.error(`Error in ${selectedTab} analysis:`, error);
       
@@ -120,6 +137,9 @@ const CodeReviewPage = () => {
         if (errorObj.response?.data?.message) {
           errorMessage = `Server error: ${errorObj.response.data.message}`;
         }
+        
+        // Log the full error response for debugging
+        console.error("Full error response:", errorObj.response?.data);
       }
       
       setAnalysisResult(errorMessage);

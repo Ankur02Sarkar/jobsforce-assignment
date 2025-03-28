@@ -363,6 +363,13 @@ const Modal = ({
   );
 };
 
+// Function to check if a string is a valid MongoDB ObjectId format
+function isValidObjectId(id: string | null): boolean {
+  if (!id) return false;
+  // MongoDB ObjectIds are 24 hex characters
+  return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
 const CodeQuestion = () => {
   const params = useParams();
   const router = useRouter();
@@ -875,8 +882,8 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       }
       
       // If still no interviewId, we can't proceed
-      if (!interviewId) {
-        console.error("No interview ID found - cannot save results");
+      if (!interviewId || !isValidObjectId(interviewId)) {
+        console.error("No valid interview ID found - cannot save results");
         return;
       }
       
@@ -1372,6 +1379,13 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
                   if (!interviewId) {
                     const urlParams = new URLSearchParams(window.location.search);
                     interviewId = urlParams.get('interviewId');
+                  }
+                  
+                  // Only proceed with valid ObjectId
+                  if (!isValidObjectId(interviewId)) {
+                    console.warn("Invalid interview ID for code review:", interviewId);
+                    alert("Cannot access code review: Invalid interview ID. Please start a new interview session.");
+                    return;
                   }
                   
                   // Save solution data to Zustand store
