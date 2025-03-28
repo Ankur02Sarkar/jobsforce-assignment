@@ -27,7 +27,8 @@ const CodeReviewPage = () => {
     problemStatement, 
     questionTitle, 
     questionId, 
-    problemType 
+    problemType,
+    solutionHint 
   } = useSolutionStore();
 
   // State variables
@@ -44,6 +45,14 @@ const CodeReviewPage = () => {
     setOptimizedCode("");
 
     try {
+      // For debugging
+      console.log("Analysis request with:", {
+        tab: selectedTab,
+        problemId: id.toString(),
+        questionId,
+        interviewId
+      });
+      
       // Call the appropriate API endpoint based on the selected tab
       let result;
       
@@ -52,9 +61,9 @@ const CodeReviewPage = () => {
           code,
           language,
           problemStatement,
-          problemId: id,
+          problemId: id.toString(),
           interviewId,
-          questionId: parseInt(questionId),
+          questionId: questionId,
         });
 
         if (result.success) {
@@ -66,9 +75,9 @@ const CodeReviewPage = () => {
           code,
           language,
           problemType,
-          problemId: id,
+          problemId: id.toString(),
           interviewId,
-          questionId: parseInt(questionId),
+          questionId: questionId,
         });
 
         if (result.success) {
@@ -81,9 +90,10 @@ const CodeReviewPage = () => {
           language,
           problemStatement,
           optimizationFocus,
-          problemId: id,
+          problemId: id.toString(),
           interviewId, 
-          questionId: parseInt(questionId),
+          questionId: questionId,
+          solutionHint: solutionHint
         });
 
         if (result.success) {
@@ -100,7 +110,19 @@ const CodeReviewPage = () => {
       }
     } catch (error) {
       console.error(`Error in ${selectedTab} analysis:`, error);
-      setAnalysisResult(`Error occurred during analysis. Please try again later.`);
+      
+      // Get detailed error message if available
+      let errorMessage = "Error occurred during analysis. Please try again later.";
+      if (error instanceof Error) {
+        errorMessage = `Error: ${error.message}`;
+      } else if (typeof error === 'object' && error !== null) {
+        const errorObj = error as any;
+        if (errorObj.response?.data?.message) {
+          errorMessage = `Server error: ${errorObj.response.data.message}`;
+        }
+      }
+      
+      setAnalysisResult(errorMessage);
     } finally {
       setIsLoading(false);
     }

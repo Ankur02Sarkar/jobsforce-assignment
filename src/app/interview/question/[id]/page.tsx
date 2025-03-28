@@ -919,7 +919,7 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
         language: selectedLanguage, // Store the language used
         score: 10, // Assuming a perfect score for passing all test cases
         questionId: question.id, // Store the question ID to track duplicates
-        timeTaken: completionTime // Store the time taken to complete the question
+        timeTaken: completionTime, // Store the time taken to complete the question
       };
       
       // Check if this question already exists in the array
@@ -1382,6 +1382,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
                     questionTitle: question?.title || '',
                     questionId: question?.id.toString() || '',
                     problemType: question?.problemType || '',
+                    solutionHint: question?.solutionHint || '',
                   });
                 }
                 
