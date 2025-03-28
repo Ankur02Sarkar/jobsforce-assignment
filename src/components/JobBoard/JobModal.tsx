@@ -224,7 +224,7 @@ const JobModal = ({ job, isOpen, onClose }: JobModalProps) => {
                     <Button
                       onClick={() => {
                         if (job.rest_id) {
-                          router.push(`/interview/${job.rest_id}`);
+                          router.push(`/interview/job/${job.rest_id}`);
                         }
                       }}
                       disabled={!job.rest_id}

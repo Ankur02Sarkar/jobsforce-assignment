@@ -140,7 +140,7 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
           onClick={(e) => {
             e.stopPropagation();
             if (job.rest_id) {
-              router.push(`/interview/${job.rest_id}`);
+              router.push(`/interview/job/${job.rest_id}`);
             }
           }}
           className="inline-flex items-center px-3 py-1.5 bg-green-400/10 text-green-500 text-sm font-medium rounded-md hover:bg-primary/20 transition-colors cursor-pointer"
