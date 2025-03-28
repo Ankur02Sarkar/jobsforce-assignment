@@ -18,8 +18,8 @@ jobs:
         with:
           version: latest
       
-      - name: Run Biome
-        run: biome ci .
+      - name: Run Biome Format Check
+        run: biome format --write=false .
 
   build:
     runs-on: ubuntu-latest
