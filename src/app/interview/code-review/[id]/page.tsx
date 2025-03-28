@@ -507,7 +507,7 @@ const CodeReviewPage = () => {
               ? result.data.optimizationSuggestions 
               : result.data.optimizationSuggestions.optimizedCode || result.data.optimizationSuggestions.code || ''
           );
-          
+            
           if (optimizedCodeText) {
             setOptimizedCode(optimizedCodeText);
           }
@@ -651,13 +651,17 @@ const CodeReviewPage = () => {
               {/* Your Code Section */}
               <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden">
                 <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-                  <h2 className="font-medium text-gray-900 dark:text-white">Your Solution</h2>
+                  <h2 className="font-medium text-gray-900 dark:text-white">
+                    {selectedTab === "optimize" && optimizedCode 
+                      ? "Optimized Solution" 
+                      : "Your Solution"}
+                  </h2>
                   <div className="text-sm text-gray-500 dark:text-gray-400">{language}</div>
                 </div>
                 <div className="p-4">
                   <div className={styles.editorContainer}>
                     <CodeEditor
-                      value={code}
+                      value={selectedTab === "optimize" && optimizedCode ? optimizedCode : code}
                       onChange={() => {}} // Read-only
                       language={language}
                       placeholder="Your code will appear here..."
@@ -701,6 +705,29 @@ const CodeReviewPage = () => {
                 </div>
               )}
 
+              {/* Original Solution (when optimized code is shown) */}
+              {selectedTab === "optimize" && optimizedCode && (
+                <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                    <h2 className="font-medium text-gray-900 dark:text-white">
+                      Original Solution
+                    </h2>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{language}</div>
+                  </div>
+                  <div className="p-4">
+                    <div className={styles.editorContainer}>
+                      <CodeEditor
+                        value={code}
+                        onChange={() => {}} // Read-only
+                        language={language}
+                        readOnly={true}
+                        className={styles.editor}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Run Analysis Button */}
               <div>
                 <button
@@ -727,39 +754,11 @@ const CodeReviewPage = () => {
                         ? "Code Analysis"
                         : selectedTab === "complexity"
                         ? "Complexity Analysis"
-                        : "Optimization"
+                        : optimizedCode ? "Re-Optimize" : "Optimization"
                     }`
                   )}
                 </button>
               </div>
-              
-              {/* Optimized Code for small screens (shown below on mobile) */}
-              {selectedTab === "optimize" && optimizedCode && (
-                <div className="lg:hidden">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden"
-                  >
-                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                      <h2 className="font-medium text-gray-900 dark:text-white">
-                        Optimized Solution
-                      </h2>
-                    </div>
-                    <div className="p-4">
-                      <div className={styles.editorContainer}>
-                        <CodeEditor
-                          value={optimizedCode}
-                          onChange={() => {}} // Read-only
-                          language={language}
-                          readOnly={true}
-                          className={styles.editor}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              )}
             </div>
 
             {/* Right Column - Analysis Results */}
@@ -769,17 +768,17 @@ const CodeReviewPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden h-full"
-              >
-                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                  <h2 className="font-medium text-gray-900 dark:text-white">
-                    {selectedTab === "analyze"
-                      ? "Code Analysis"
-                      : selectedTab === "complexity"
-                      ? "Complexity Analysis"
-                      : "Optimization Suggestions"}
-                  </h2>
-                </div>
-                <div className={`p-4 prose dark:prose-invert max-w-none ${styles.resultContainer}`}>
+            >
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                <h2 className="font-medium text-gray-900 dark:text-white">
+                  {selectedTab === "analyze"
+                    ? "Code Analysis"
+                    : selectedTab === "complexity"
+                    ? "Complexity Analysis"
+                    : "Optimization Suggestions"}
+                </h2>
+              </div>
+              <div className={`p-4 prose dark:prose-invert max-w-none ${styles.resultContainer}`}>
                   {analysisResult ? (
                     // If we have analysis results
                     analysisResult.startsWith('<div') ? (
@@ -787,42 +786,14 @@ const CodeReviewPage = () => {
                       <div dangerouslySetInnerHTML={{ __html: analysisResult }} />
                     ) : (
                       // Otherwise format as paragraphs with line breaks
-                      <div dangerouslySetInnerHTML={{ __html: analysisResult.replace(/\n/g, "<br />") }} />
+                <div dangerouslySetInnerHTML={{ __html: analysisResult.replace(/\n/g, "<br />") }} />
                     )
                   ) : (
                     // Show placeholder if no results for this tab
                     <div dangerouslySetInnerHTML={{ __html: getPlaceholderText() }} />
                   )}
-                </div>
-              </motion.div>
-
-              {/* Optimized Code for large screens (shown alongside on desktop) */}
-              {selectedTab === "optimize" && optimizedCode && (
-                <div className="hidden lg:block">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden"
-                  >
-                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                      <h2 className="font-medium text-gray-900 dark:text-white">
-                        Optimized Solution
-                      </h2>
-                    </div>
-                    <div className="p-4">
-                      <div className={styles.editorContainer}>
-                        <CodeEditor
-                          value={optimizedCode}
-                          onChange={() => {}} // Read-only
-                          language={language}
-                          readOnly={true}
-                          className={styles.editor}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              )}
+              </div>
+            </motion.div>
             </div>
           </div>
         </div>
