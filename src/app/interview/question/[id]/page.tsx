@@ -20,6 +20,7 @@ import createJudge0Client, { type SubmissionResult } from "@/lib/judge0";
 import CodeEditor from "@/components/ui/code-editor";
 import confetti from "canvas-confetti";
 import { apiPut, apiGet } from "@/lib/api";
+import { useSolutionStore } from "@/lib/store";
 
 // Mock data - in a real app, this would come from an API
 const codingQuestions = [
@@ -150,6 +151,8 @@ public:
     return []`,
     },
     tags: ["Array", "Hash Table"],
+    problemType: "Array",
+    solutionHint: "Use a hash map to store previously seen values and their indices for O(1) lookups.",
   },
   {
     id: 2,
@@ -300,6 +303,8 @@ public:
     return not stack`,
     },
     tags: ["Stack", "String"],
+    problemType: "Stack",
+    solutionHint: "Use a stack to track opening brackets and verify matching closing brackets in the correct order.",
   },
   // ... other questions
 ];
@@ -379,6 +384,9 @@ const CodeQuestion = () => {
 
   // Create Judge0 client
   const judge0Client = createJudge0Client();
+
+  // Access the solution store
+  const setSolutionData = useSolutionStore((state) => state.setSolutionData);
 
   // Load the starting code when the language changes
   useEffect(() => {
@@ -882,6 +890,8 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
           questions?: Array<{
             question: string;
             answer?: string;
+            code?: string; // Add code field to store the solution code
+            language?: string; // Add language field to store the programming language
             score?: number;
             questionId?: number;  // Add questionId to track unique questions
             timeTaken?: number;   // Add timeTaken to track completion time per question
@@ -905,6 +915,8 @@ Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
       const newQuestion = {
         question: question.title,
         answer: code,
+        code: code, // Store full solution code
+        language: selectedLanguage, // Store the language used
         score: 10, // Assuming a perfect score for passing all test cases
         questionId: question.id, // Store the question ID to track duplicates
         timeTaken: completionTime // Store the time taken to complete the question
@@ -1350,6 +1362,36 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`
               className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
               Return to Challenges
+            </button>
+            <button
+              onClick={() => {
+                // Navigate to code review page with question id and interview id
+                let interviewId;
+                if (typeof window !== 'undefined') {
+                  interviewId = localStorage.getItem('currentInterviewId');
+                  if (!interviewId) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    interviewId = urlParams.get('interviewId');
+                  }
+                  
+                  // Save solution data to Zustand store
+                  setSolutionData({
+                    code,
+                    language: selectedLanguage,
+                    problemStatement: question?.fullDescription || '',
+                    questionTitle: question?.title || '',
+                    questionId: question?.id.toString() || '',
+                    problemType: question?.problemType || '',
+                  });
+                }
+                
+                // Navigate to code review page
+                router.push(`/interview/code-review/${question.id}?interviewId=${interviewId || ''}`);
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Code Review
             </button>
             {question && question.id < codingQuestions.length && (
               <button

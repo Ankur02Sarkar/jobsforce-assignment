@@ -27,11 +27,9 @@ export function MainWrapper({ children }: MainWrapperProps) {
 
   const getUserDetails = async (clerkId: string) => {
     try {
-      const data = await withLoading(async () => {
-        return await apiGet<{ data: { token: string; user: any } }>(
-          `/api/users/clerk/${clerkId}`,
-        );
-      });
+      const data = await apiGet<{ data: { token: string; user: any } }>(
+        `/api/users/clerk/${clerkId}`,
+      );
       const { token, user } = data?.data || {};
 
       if (user) {

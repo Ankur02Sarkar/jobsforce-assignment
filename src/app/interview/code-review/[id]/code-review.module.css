@@ -1,0 +1,39 @@
+.editorContainer {
+  height: 400px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.375rem;
+}
+
+/* Style for the editor instance */
+.editor {
+  height: 100% !important;
+  min-height: 400px;
+  width: 100% !important;
+}
+
+/* Target Monaco editor specifically */
+.editor :global(.monaco-editor),
+.editor :global(.monaco-editor .overflow-guard) {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.resultContainer {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .editorContainer {
+    height: 300px;
+  }
+  
+  .editor {
+    min-height: 300px;
+  }
+  
+  .resultContainer {
+    max-height: 400px;
+  }
+} 
