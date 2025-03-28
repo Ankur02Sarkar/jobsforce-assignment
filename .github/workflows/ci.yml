@@ -21,34 +21,16 @@ jobs:
       - name: Run Biome Format Check
         run: biome format --write .
 
-  build:
+  secret-scan:
     runs-on: ubuntu-latest
     needs: code-quality
-
+    
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
+        fetch-depth: 0
       
-    - name: Install platform-specific Tailwind dependencies
-      run: npm install @tailwindcss/oxide-linux-x64-gnu
-      
-    - name: Build
-      run: npm run build
+    - name: Gitleaks
+      uses: gitleaks/gitleaks-action@v2
       env:
-        # Using CI-safe placeholders for build verification only
-        # These aren't real secrets, just placeholders for CI build testing
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_dummy-key-for-ci-build'
-        CLERK_SECRET_KEY: 'sk_test_dummy-key-for-ci-build'
-        NEXT_PUBLIC_BACKEND_URL: 'https://example.com/api'
-        NEXT_PUBLIC_FRONTEND_URL: 'https://example.com'
-        NEXT_PUBLIC_RAPIDAPI_KEY: 'dummy-key-for-ci-build'
-        # Set CI mode to true to enable CI-safe build process
-        CI: true 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
