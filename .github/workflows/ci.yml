@@ -37,6 +37,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Install platform-specific Tailwind dependencies
+      run: npm install @tailwindcss/oxide-linux-x64-gnu
+      
     - name: Build
       run: npm run build
       env:
