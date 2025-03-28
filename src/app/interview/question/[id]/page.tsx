@@ -1260,8 +1260,8 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                       <div className="px-4 py-2 bg-amber-100 dark:bg-amber-900 border-b border-amber-200 dark:border-amber-800 flex items-center flex-shrink-0">
                         <Lock className="w-4 h-4 mr-2 text-amber-600 dark:text-amber-400" />
                         <span className="text-xs text-amber-800 dark:text-amber-200">
-                          Please do not modify the "Example usage" section. It
-                          is required for test case evaluation.
+                          Please do not modify the &quot;Example usage&quot;
+                          section. It is required for test case evaluation.
                         </span>
                       </div>
                       <div className="p-4 flex-1 overflow-hidden flex flex-col">
@@ -1365,7 +1365,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
             transition={{ delay: 0.3 }}
             className="text-gray-600 dark:text-gray-300 mb-4"
           >
-            You've successfully completed the {question.title} challenge.
+            You&apos;ve successfully completed the {question.title} challenge.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}

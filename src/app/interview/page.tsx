@@ -133,7 +133,7 @@ const InterviewPage = () => {
       {!loading && !error && interviews.length === 0 && (
         <div className="text-center py-16 bg-gray-50 rounded-md">
           <p className="text-gray-500 mb-4">
-            You haven't taken any interviews yet
+            You haven&apos;t taken any interviews yet
           </p>
           <button
             onClick={handleNewInterview}

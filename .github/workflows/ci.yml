@@ -19,7 +19,7 @@ jobs:
           version: latest
       
       - name: Run Biome Format Check
-        run: biome format --write=false .
+        run: biome format --write .
 
   build:
     runs-on: ubuntu-latest

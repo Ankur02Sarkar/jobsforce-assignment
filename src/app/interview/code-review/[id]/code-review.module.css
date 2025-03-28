@@ -28,12 +28,12 @@
   .editorContainer {
     height: 300px;
   }
-  
+
   .editor {
     min-height: 300px;
   }
-  
+
   .resultContainer {
     max-height: 400px;
   }
-} 
+}
