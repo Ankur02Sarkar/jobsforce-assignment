@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Code, BarChart2, Zap, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -38,7 +38,12 @@ const CodeReviewPage = () => {
     questionTitle, 
     questionId, 
     problemType,
-    solutionHint 
+    solutionHint,
+    // Add analysis methods from store
+    setAnalysisResult: storeAnalysisResult,
+    setComplexityResult: storeComplexityResult,
+    setOptimizationResult: storeOptimizationResult,
+    getResultsForInterview
   } = useSolutionStore();
 
   // State variables
@@ -47,6 +52,50 @@ const CodeReviewPage = () => {
   const [analysisResult, setAnalysisResult] = useState<string>("");
   const [optimizedCode, setOptimizedCode] = useState<string>("");
   const [optimizationFocus, setOptimizationFocus] = useState<"time" | "space">("time");
+  const [hasRunAnalysis, setHasRunAnalysis] = useState<{
+    analyze: boolean;
+    complexity: boolean;
+    optimize: boolean;
+  }>({ analyze: false, complexity: false, optimize: false });
+
+  // Effect to load stored results when tab changes
+  useEffect(() => {
+    if (!interviewId) return;
+    
+    const storedResults = getResultsForInterview(interviewId);
+    if (!storedResults) return;
+    
+    // Update hasRunAnalysis based on stored results
+    setHasRunAnalysis(prev => ({
+      analyze: !!storedResults.analyze?.formattedAnalysis || prev.analyze,
+      complexity: !!storedResults.complexity?.formattedAnalysis || prev.complexity,
+      optimize: !!storedResults.optimize?.formattedAnalysis || prev.optimize
+    }));
+    
+    // Load the appropriate results based on selected tab
+    if (selectedTab === "analyze" && storedResults.analyze) {
+      if (storedResults.analyze.formattedAnalysis) {
+        setAnalysisResult(storedResults.analyze.formattedAnalysis);
+      }
+    } else if (selectedTab === "complexity" && storedResults.complexity) {
+      if (storedResults.complexity.formattedAnalysis) {
+        setAnalysisResult(storedResults.complexity.formattedAnalysis);
+      }
+    } else if (selectedTab === "optimize" && storedResults.optimize) {
+      if (storedResults.optimize.formattedAnalysis) {
+        setAnalysisResult(storedResults.optimize.formattedAnalysis);
+      }
+      if (storedResults.optimize.optimizedCode) {
+        setOptimizedCode(storedResults.optimize.optimizedCode);
+      }
+    } else {
+      // Clear results if we don't have stored data for this tab
+      setAnalysisResult("");
+      if (selectedTab !== "optimize") {
+        setOptimizedCode("");
+      }
+    }
+  }, [selectedTab, interviewId, getResultsForInterview]);
 
   // Function to analyze the code
   const analyzeCode = async () => {
@@ -145,9 +194,28 @@ const CodeReviewPage = () => {
             
             formattedAnalysis += `</div>`;
             setAnalysisResult(formattedAnalysis);
+            
+            // Store in Zustand and mark as analyzed
+            if (interviewId) {
+              storeAnalysisResult(interviewId, {
+                analysisText: result.data.analysisText,
+                algorithmAnalysis: result.data.algorithmAnalysis,
+                formattedAnalysis
+              });
+              setHasRunAnalysis(prev => ({ ...prev, analyze: true }));
+            }
           } else if (result.data.analysisText) {
             // Format existing analysis as a string
             setAnalysisResult(result.data.analysisText);
+            
+            // Store in Zustand and mark as analyzed
+            if (interviewId) {
+              storeAnalysisResult(interviewId, {
+                analysisText: result.data.analysisText,
+                formattedAnalysis: result.data.analysisText
+              });
+              setHasRunAnalysis(prev => ({ ...prev, analyze: true }));
+            }
           } else if (result.data.algorithmAnalysis) {
             // Format structured algorithm analysis data
             const analysis = result.data.algorithmAnalysis;
@@ -203,6 +271,15 @@ const CodeReviewPage = () => {
             
             formattedAnalysis += `</div>`;
             setAnalysisResult(formattedAnalysis);
+            
+            // Store in Zustand and mark as analyzed
+            if (interviewId) {
+              storeAnalysisResult(interviewId, {
+                algorithmAnalysis: result.data.algorithmAnalysis,
+                formattedAnalysis
+              });
+              setHasRunAnalysis(prev => ({ ...prev, analyze: true }));
+            }
           } else {
             setAnalysisResult("No analysis available");
           }
@@ -312,12 +389,40 @@ const CodeReviewPage = () => {
             
             formattedAnalysis += `</div>`;
             setAnalysisResult(formattedAnalysis);
+            
+            // Store in Zustand and mark as analyzed
+            if (interviewId) {
+              storeComplexityResult(interviewId, {
+                analysisText: result.data.analysisText,
+                complexityAnalysis: result.data.complexityAnalysis,
+                formattedAnalysis
+              });
+              setHasRunAnalysis(prev => ({ ...prev, complexity: true }));
+            }
           } else if (result.data.analysisText) {
             // Use text analysis if available
             setAnalysisResult(result.data.analysisText);
+            
+            // Store in Zustand and mark as analyzed
+            if (interviewId) {
+              storeComplexityResult(interviewId, {
+                analysisText: result.data.analysisText,
+                formattedAnalysis: result.data.analysisText
+              });
+              setHasRunAnalysis(prev => ({ ...prev, complexity: true }));
+            }
           } else if (typeof result.data.complexityAnalysis === 'string') {
             // Use string complexity analysis if that's what we got
             setAnalysisResult(result.data.complexityAnalysis);
+            
+            // Store in Zustand and mark as analyzed
+            if (interviewId) {
+              storeComplexityResult(interviewId, {
+                complexityAnalysis: result.data.complexityAnalysis,
+                formattedAnalysis: result.data.complexityAnalysis
+              });
+              setHasRunAnalysis(prev => ({ ...prev, complexity: true }));
+            }
           } else {
             setAnalysisResult("No complexity analysis available");
           }
@@ -397,12 +502,25 @@ const CodeReviewPage = () => {
           setAnalysisResult(formattedAnalysis);
           
           // Check if we have optimized code and set it
-          if (result.data.optimizationSuggestions) {
-            const optimizedCodeText = typeof result.data.optimizationSuggestions === 'string' 
+          const optimizedCodeText = result.data.optimizationSuggestions && (
+            typeof result.data.optimizationSuggestions === 'string' 
               ? result.data.optimizationSuggestions 
-              : result.data.optimizationSuggestions.optimizedCode || result.data.optimizationSuggestions.code || '';
-            
+              : result.data.optimizationSuggestions.optimizedCode || result.data.optimizationSuggestions.code || ''
+          );
+          
+          if (optimizedCodeText) {
             setOptimizedCode(optimizedCodeText);
+          }
+          
+          // Store in Zustand and mark as analyzed
+          if (interviewId) {
+            storeOptimizationResult(interviewId, {
+              optimizationText: result.data.optimizationText,
+              optimizationSuggestions: result.data.optimizationSuggestions,
+              formattedAnalysis,
+              optimizedCode: optimizedCodeText
+            });
+            setHasRunAnalysis(prev => ({ ...prev, optimize: true }));
           }
         }
       }
@@ -429,6 +547,29 @@ const CodeReviewPage = () => {
       setAnalysisResult(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Function to get placeholder text based on selected tab
+  const getPlaceholderText = () => {
+    if (selectedTab === "analyze") {
+      return `<div class="text-center py-8">
+        <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Analysis Yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Run code analysis to get insights about your solution.</p>
+        <p class="text-sm text-gray-400 dark:text-gray-500">Analysis will evaluate your approach, identify edge cases, and provide optimization tips.</p>
+      </div>`;
+    } else if (selectedTab === "complexity") {
+      return `<div class="text-center py-8">
+        <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Complexity Analysis Yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Run complexity analysis to understand the time and space complexity of your code.</p>
+        <p class="text-sm text-gray-400 dark:text-gray-500">This will identify critical operations and compare your solution to optimal approaches.</p>
+      </div>`;
+    } else {
+      return `<div class="text-center py-8">
+        <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Optimization Suggestions Yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Run optimization to get suggestions for improving your code.</p>
+        <p class="text-sm text-gray-400 dark:text-gray-500">Choose between optimizing for time or space complexity.</p>
+      </div>`;
     }
   };
 
@@ -459,7 +600,9 @@ const CodeReviewPage = () => {
       <div className="p-4 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800">
         <div className="flex space-x-2 overflow-x-auto">
           <button
-            onClick={() => setSelectedTab("analyze")}
+            onClick={() => {
+              setSelectedTab("analyze");
+            }}
             className={`px-4 py-2 rounded-md flex items-center font-medium transition-colors ${
               selectedTab === "analyze"
                 ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
@@ -470,7 +613,9 @@ const CodeReviewPage = () => {
             Analyze Code
           </button>
           <button
-            onClick={() => setSelectedTab("complexity")}
+            onClick={() => {
+              setSelectedTab("complexity");
+            }}
             className={`px-4 py-2 rounded-md flex items-center font-medium transition-colors ${
               selectedTab === "complexity"
                 ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
@@ -481,7 +626,9 @@ const CodeReviewPage = () => {
             Time & Space Complexity
           </button>
           <button
-            onClick={() => setSelectedTab("optimize")}
+            onClick={() => {
+              setSelectedTab("optimize");
+            }}
             className={`px-4 py-2 rounded-md flex items-center font-medium transition-colors ${
               selectedTab === "optimize"
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
@@ -496,145 +643,188 @@ const CodeReviewPage = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-5xl mx-auto">
-          {/* Your Code Section */}
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm mb-6 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-              <h2 className="font-medium text-gray-900 dark:text-white">Your Solution</h2>
-              <div className="text-sm text-gray-500 dark:text-gray-400">{language}</div>
-            </div>
-            <div className="p-4">
-              <div className={styles.editorContainer}>
-                <CodeEditor
-                  value={code}
-                  onChange={() => {}} // Read-only
-                  language={language}
-                  placeholder="Your code will appear here..."
-                  readOnly={true}
-                  className={styles.editor}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Options for Optimize Tab */}
-          {selectedTab === "optimize" && (
-            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm mb-6 p-4">
-              <div className="flex items-center space-x-4">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Optimize for:
-                </span>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setOptimizationFocus("time")}
-                    className={`px-3 py-1 text-sm rounded-md ${
-                      optimizationFocus === "time"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                    }`}
-                  >
-                    Time Complexity
-                  </button>
-                  <button
-                    onClick={() => setOptimizationFocus("space")}
-                    className={`px-3 py-1 text-sm rounded-md ${
-                      optimizationFocus === "space"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                    }`}
-                  >
-                    Space Complexity
-                  </button>
+        <div className="max-w-6xl mx-auto">
+          {/* Responsive layout - Grid for larger screens */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column - Code and Controls */}
+            <div className="space-y-6">
+              {/* Your Code Section */}
+              <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                  <h2 className="font-medium text-gray-900 dark:text-white">Your Solution</h2>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">{language}</div>
+                </div>
+                <div className="p-4">
+                  <div className={styles.editorContainer}>
+                    <CodeEditor
+                      value={code}
+                      onChange={() => {}} // Read-only
+                      language={language}
+                      placeholder="Your code will appear here..."
+                      readOnly={true}
+                      className={styles.editor}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Run Analysis Button */}
-          <div className="mb-6">
-            <button
-              onClick={analyzeCode}
-              disabled={isLoading}
-              className={`w-full py-3 rounded-lg font-medium text-white flex items-center justify-center ${
-                isLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : selectedTab === "analyze"
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : selectedTab === "complexity"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-purple-600 hover:bg-purple-700"
-              }`}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                `Run ${
-                  selectedTab === "analyze"
-                    ? "Code Analysis"
-                    : selectedTab === "complexity"
-                    ? "Complexity Analysis"
-                    : "Optimization"
-                }`
+              {/* Options for Optimize Tab */}
+              {selectedTab === "optimize" && (
+                <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm p-4">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Optimize for:
+                    </span>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => setOptimizationFocus("time")}
+                        className={`px-3 py-1 text-sm rounded-md ${
+                          optimizationFocus === "time"
+                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                            : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                        }`}
+                      >
+                        Time Complexity
+                      </button>
+                      <button
+                        onClick={() => setOptimizationFocus("space")}
+                        className={`px-3 py-1 text-sm rounded-md ${
+                          optimizationFocus === "space"
+                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                            : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                        }`}
+                      >
+                        Space Complexity
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
-            </button>
-          </div>
 
-          {/* Analysis Results */}
-          {analysisResult && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden"
-            >
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                <h2 className="font-medium text-gray-900 dark:text-white">
-                  {selectedTab === "analyze"
-                    ? "Code Analysis"
-                    : selectedTab === "complexity"
-                    ? "Complexity Analysis"
-                    : "Optimization Suggestions"}
-                </h2>
+              {/* Run Analysis Button */}
+              <div>
+                <button
+                  onClick={analyzeCode}
+                  disabled={isLoading}
+                  className={`w-full py-3 rounded-lg font-medium text-white flex items-center justify-center ${
+                    isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : selectedTab === "analyze"
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : selectedTab === "complexity"
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-purple-600 hover:bg-purple-700"
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    `Run ${
+                      selectedTab === "analyze"
+                        ? "Code Analysis"
+                        : selectedTab === "complexity"
+                        ? "Complexity Analysis"
+                        : "Optimization"
+                    }`
+                  )}
+                </button>
               </div>
-              <div className={`p-4 prose dark:prose-invert max-w-none ${styles.resultContainer}`}>
-                {analysisResult.startsWith('<div') ? (
-                  // If it's already HTML formatted, use dangerouslySetInnerHTML directly
-                  <div dangerouslySetInnerHTML={{ __html: analysisResult }} />
-                ) : (
-                  // Otherwise format as paragraphs with line breaks
-                  <div dangerouslySetInnerHTML={{ __html: analysisResult.replace(/\n/g, "<br />") }} />
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Optimized Code (only for optimize tab) */}
-          {selectedTab === "optimize" && optimizedCode && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-6 bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden"
-            >
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                <h2 className="font-medium text-gray-900 dark:text-white">
-                  Optimized Solution
-                </h2>
-              </div>
-              <div className="p-4">
-                <div className={styles.editorContainer}>
-                  <CodeEditor
-                    value={optimizedCode}
-                    onChange={() => {}} // Read-only
-                    language={language}
-                    readOnly={true}
-                    className={styles.editor}
-                  />
+              
+              {/* Optimized Code for small screens (shown below on mobile) */}
+              {selectedTab === "optimize" && optimizedCode && (
+                <div className="lg:hidden">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden"
+                  >
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                      <h2 className="font-medium text-gray-900 dark:text-white">
+                        Optimized Solution
+                      </h2>
+                    </div>
+                    <div className="p-4">
+                      <div className={styles.editorContainer}>
+                        <CodeEditor
+                          value={optimizedCode}
+                          onChange={() => {}} // Read-only
+                          language={language}
+                          readOnly={true}
+                          className={styles.editor}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              )}
+            </div>
+
+            {/* Right Column - Analysis Results */}
+            <div className="space-y-6">
+              {/* Analysis Results */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden h-full"
+              >
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                  <h2 className="font-medium text-gray-900 dark:text-white">
+                    {selectedTab === "analyze"
+                      ? "Code Analysis"
+                      : selectedTab === "complexity"
+                      ? "Complexity Analysis"
+                      : "Optimization Suggestions"}
+                  </h2>
+                </div>
+                <div className={`p-4 prose dark:prose-invert max-w-none ${styles.resultContainer}`}>
+                  {analysisResult ? (
+                    // If we have analysis results
+                    analysisResult.startsWith('<div') ? (
+                      // If it's already HTML formatted, use dangerouslySetInnerHTML directly
+                      <div dangerouslySetInnerHTML={{ __html: analysisResult }} />
+                    ) : (
+                      // Otherwise format as paragraphs with line breaks
+                      <div dangerouslySetInnerHTML={{ __html: analysisResult.replace(/\n/g, "<br />") }} />
+                    )
+                  ) : (
+                    // Show placeholder if no results for this tab
+                    <div dangerouslySetInnerHTML={{ __html: getPlaceholderText() }} />
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Optimized Code for large screens (shown alongside on desktop) */}
+              {selectedTab === "optimize" && optimizedCode && (
+                <div className="hidden lg:block">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden"
+                  >
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                      <h2 className="font-medium text-gray-900 dark:text-white">
+                        Optimized Solution
+                      </h2>
+                    </div>
+                    <div className="p-4">
+                      <div className={styles.editorContainer}>
+                        <CodeEditor
+                          value={optimizedCode}
+                          onChange={() => {}} // Read-only
+                          language={language}
+                          readOnly={true}
+                          className={styles.editor}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
