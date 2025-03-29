@@ -2,30 +2,28 @@
 
 A modern, feature-rich job application platform built with Next.js 15 and React 19. JobsForce provides a seamless job searching, application management, and technical interviewing experience.
 
-![JobsForce Platform](https://placeholder-for-jobsforce-screenshot.com)
+## 🔗 Related Repositories
+- [JobsForce Backend](https://github.com/Ankur02Sarkar/jobsforce-backend) - The backend API powering the JobsForce platform
 
 ## 🚀 Features
 
 ### 💼 Job Board
-- **Advanced Job Search**: Filter jobs by skills, location, and experience level
-- **Personalized Job Recommendations**: Smart job matching based on your profile
-- **Application Tracking**: Monitor your application status in real-time
+- **Advanced Job Search**: Filter by skills, location, experience level and more
+- **Job Listings**: WebScrapped from Twitter Jobs
 
 ### 👩‍💻 Interactive Technical Interviews
 - **Coding Challenges**: LeetCode-style problems with real-time execution
 - **Multi-language Support**: JavaScript, Python, Java, and C++
 - **Automated Test Validation**: Instant feedback on code solutions
 - **Code Review**: Practice code review scenarios for real-world preparation
-
-### 👤 User Management
-- **Secure Authentication**: Powered by Clerk for seamless and secure user management
-- **Profile Management**: Comprehensive profile building with resume upload
-- **Dashboard**: Track applications, interviews, and job statuses
+- **Time-limited Assessments**: Simulate real interview pressure with timed challenges
 
 ### 📱 Progressive Web App
 - **Responsive Design**: Works seamlessly across devices
 - **Offline Support**: Core functionality available without internet
 - **Installable**: Add to home screen on mobile devices
+- **Push Notifications**: Get alerts for application status changes and new opportunities
+- **Fast Loading**: Optimized for quick startup and navigation
 
 ## 📂 Project Structure
 
