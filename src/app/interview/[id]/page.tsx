@@ -377,7 +377,7 @@ const InterviewDetailPage = () => {
           {codingQuestions.map((question) => (
             <motion.div
               key={question.id}
-              className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all"
+              className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all flex flex-col justify-between"
               whileHover={{ y: -5 }}
               onClick={() => navigateToQuestion(question.id)}
               onHoverStart={() => setHoveredId(question.id)}

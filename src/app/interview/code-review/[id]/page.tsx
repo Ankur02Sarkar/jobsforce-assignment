@@ -8,6 +8,7 @@ import CodeEditor from "@/components/ui/code-editor";
 import { apiPost } from "@/lib/api";
 import { useSolutionStore } from "@/lib/store";
 import styles from "./code-review.module.css";
+import CompareItems from "@/components/CompareItems";
 
 // Tabs for different analyses
 type AnalysisTab = "analyze" | "complexity" | "optimize";
@@ -734,20 +735,29 @@ const CodeReviewPage = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <div className={styles.editorContainer}>
-                    <CodeEditor
-                      value={
-                        selectedTab === "optimize" && optimizedCode
-                          ? optimizedCode
-                          : code
-                      }
-                      onChange={() => {}} // Read-only
+                  {selectedTab === "optimize" && optimizedCode ? (
+                    <CompareItems
+                      type="code"
+                      firstItem={optimizedCode}
+                      secondItem={code}
                       language={language}
-                      placeholder="Your code will appear here..."
-                      readOnly={true}
-                      className={styles.editor}
                     />
-                  </div>
+                  ) : (
+                    <div className={styles.editorContainer}>
+                      <CodeEditor
+                        value={
+                          selectedTab === "optimize" && optimizedCode
+                            ? optimizedCode
+                            : code
+                        }
+                        onChange={() => {}} // Read-only
+                        language={language}
+                        placeholder="Your code will appear here..."
+                        readOnly={true}
+                        className={styles.editor}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -779,31 +789,6 @@ const CodeReviewPage = () => {
                       >
                         Space Complexity
                       </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Original Solution (when optimized code is shown) */}
-              {selectedTab === "optimize" && optimizedCode && (
-                <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden">
-                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-                    <h2 className="font-medium text-gray-900 dark:text-white">
-                      Original Solution
-                    </h2>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {language}
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className={styles.editorContainer}>
-                      <CodeEditor
-                        value={code}
-                        onChange={() => {}} // Read-only
-                        language={language}
-                        readOnly={true}
-                        className={styles.editor}
-                      />
                     </div>
                   </div>
                 </div>

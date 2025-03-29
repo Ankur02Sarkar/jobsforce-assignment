@@ -344,7 +344,7 @@ const Modal = ({
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white dark:bg-slate-900 rounded-lg w-full max-w-md overflow-hidden shadow-xl transform"
+        className="bg-white dark:bg-slate-900 rounded-lg w-full max-w-fit overflow-hidden shadow-xl transform"
       >
         <div className="p-6">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -1426,7 +1426,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                   router.push("/interview");
                 }
               }}
-              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md transition-colors"
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer"
             >
               Return to Challenges
             </button>
@@ -1472,7 +1472,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                   `/interview/code-review/${question.id}?interviewId=${interviewId || ""}`,
                 );
               }}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center cursor-pointer"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               Code Review
@@ -1499,7 +1499,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                     router.push(`/interview/question/${question.id + 1}`);
                   }
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer"
               >
                 Next Challenge
               </button>
