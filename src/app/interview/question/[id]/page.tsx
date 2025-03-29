@@ -331,11 +331,13 @@ const Modal = ({
   onClose,
   title,
   children,
+  actionButton,
 }: {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  actionButton?: React.ReactNode;
 }) => {
   if (!isOpen) return null;
 
@@ -352,10 +354,11 @@ const Modal = ({
             {title}
           </h3>
           <div className="mt-4">{children}</div>
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-end space-x-3">
+            {actionButton}
             <button
               onClick={onClose}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
               Close
             </button>
@@ -1601,6 +1604,15 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
         isOpen={isTestCaseModalOpen}
         onClose={() => setIsTestCaseModalOpen(false)}
         title="AI Generated Test Cases"
+        actionButton={
+          <button
+            onClick={applySelectedTestCase}
+            disabled={!selectedTestCase}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Apply Selected Test Case
+          </button>
+        }
       >
         <div className="max-h-96 overflow-y-auto">
           <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -1655,15 +1667,6 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                 )}
               </div>
             ))}
-          </div>
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={applySelectedTestCase}
-              disabled={!selectedTestCase}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Apply Selected Test Case
-            </button>
           </div>
         </div>
       </Modal>

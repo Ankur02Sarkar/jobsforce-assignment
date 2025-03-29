@@ -9,7 +9,7 @@ import React from "react";
 import { Logo } from "./logo";
 
 const menuItems = [
-  { name: "Dashboard", href: "/dashboard" },
+  // { name: "Dashboard", href: "/dashboard" },
   { name: "JobBoard", href: "/jobboard" },
   { name: "AI Interview", href: "/interview" },
   { name: "Profile", href: "/profile" },
