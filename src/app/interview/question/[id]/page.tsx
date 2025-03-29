@@ -1283,9 +1283,9 @@ Your output: ${JSON.stringify(testResult.output)}
 ${testResult.error ? `Runtime Error: ${testResult.error}` : ""}
 Status: ${passed ? "✅ Passed" : "❌ Failed"}`;
         })
-        .join("\\n\\n");
+        .join("\n\n");
 
-      setOutput(`Test Results:\\n\\n${testCaseResults}`);
+      setOutput(`Test Results:\n\n${testCaseResults}`);
 
       // Check if all test cases passed (now uses the updated `allPassed` flag)
       console.log("Test run results:", testCaseResults);
