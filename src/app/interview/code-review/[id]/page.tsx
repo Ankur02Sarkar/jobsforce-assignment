@@ -140,6 +140,24 @@ const CodeReviewPage = () => {
         });
 
         if (result.success) {
+          // Check if the analysis failed based on error patterns in the response
+          const isFailedAnalysis = 
+            result.data.analysisText === "Error performing code analysis" ||
+            result.data.algorithmAnalysis?.approachIdentified === "Analysis failed";
+          
+          if (isFailedAnalysis) {
+            console.error("Analysis failed:", result.data);
+            setAnalysisResult(`
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                <h3 class="text-red-600 dark:text-red-400 font-medium mb-2">Analysis Error</h3>
+                <p class="text-red-700 dark:text-red-300">The code analysis could not be performed.</p>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400">This could be due to server issues or problems with the code format. Please try again later.</p>
+            `);
+            setIsLoading(false);
+            return;
+          }
+
           // Store the full response data instead of just text
           if (result.data.analysisText && result.data.algorithmAnalysis) {
             // Format both text analysis and structured algorithm analysis data
@@ -328,6 +346,25 @@ const CodeReviewPage = () => {
         });
 
         if (result.success) {
+          // Check if the complexity analysis failed based on error patterns
+          const isFailedAnalysis = 
+            result.data.analysisText === "Error performing complexity analysis" || 
+            (result.data.complexityAnalysis?.timeComplexity?.worstCase === "Analysis failed" &&
+             result.data.complexityAnalysis?.spaceComplexity === "Analysis failed");
+          
+          if (isFailedAnalysis) {
+            console.error("Complexity analysis failed:", result.data);
+            setAnalysisResult(`
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                <h3 class="text-red-600 dark:text-red-400 font-medium mb-2">Complexity Analysis Error</h3>
+                <p class="text-red-700 dark:text-red-300">The complexity analysis could not be performed.</p>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400">This may happen with very complex code or due to temporary issues. Please try again later.</p>
+            `);
+            setIsLoading(false);
+            return;
+          }
+
           if (
             result.data.complexityAnalysis &&
             typeof result.data.complexityAnalysis === "object"
@@ -489,6 +526,24 @@ const CodeReviewPage = () => {
         });
 
         if (result.success) {
+          // Check if the optimization failed based on error patterns
+          const isFailedOptimization = 
+            result.data.optimizationText === "Error performing code optimization" ||
+            result.data.optimizationSuggestions?.optimizedCode === "Optimization failed";
+          
+          if (isFailedOptimization) {
+            console.error("Optimization failed:", result.data);
+            setAnalysisResult(`
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                <h3 class="text-red-600 dark:text-red-400 font-medium mb-2">Optimization Error</h3>
+                <p class="text-red-700 dark:text-red-300">The code optimization could not be performed.</p>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400">This may happen if the code is already highly optimized or due to temporary service issues. Please try again later.</p>
+            `);
+            setIsLoading(false);
+            return;
+          }
+
           let formattedAnalysis = `<div class="space-y-4">`;
 
           // General optimization text
@@ -606,26 +661,64 @@ const CodeReviewPage = () => {
       // Get detailed error message if available
       let errorMessage =
         "Error occurred during analysis. Please try again later.";
+      
+      // Handle different types of errors
       if (error instanceof Error) {
         errorMessage = `Error: ${error.message}`;
       } else if (typeof error === "object" && error !== null) {
         const errorObj = error as any;
+        
+        // Check for API response errors
         if (errorObj.response?.data?.message) {
           errorMessage = `Server error: ${errorObj.response.data.message}`;
+        } else if (errorObj.message) {
+          errorMessage = `Error: ${errorObj.message}`;
+        }
+
+        // Check for provider errors (Google, OpenAI, etc.)
+        if (errorObj.response?.data?.error?.metadata?.raw) {
+          try {
+            const rawError = JSON.parse(errorObj.response.data.error.metadata.raw);
+            if (rawError.error?.message) {
+              errorMessage = `Provider error: ${rawError.error.message}`;
+              console.error("Provider error details:", rawError.error);
+            }
+          } catch (e) {
+            console.error("Error parsing raw error:", e);
+          }
         }
 
         // Log the full error response for debugging
         console.error("Full error response:", errorObj.response?.data);
       }
 
-      setAnalysisResult(errorMessage);
+      setAnalysisResult(`
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+          <h3 class="text-red-600 dark:text-red-400 font-medium mb-2">Analysis Error</h3>
+          <p class="text-red-700 dark:text-red-300">${errorMessage}</p>
+        </div>
+        <p class="text-gray-600 dark:text-gray-400">Please try again later or make sure your code is valid.</p>
+      `);
     } finally {
       setIsLoading(false);
     }
   };
 
   // Function to get placeholder text based on selected tab
-  const getPlaceholderText = () => {
+  const getPlaceholderText = (isError = false) => {
+    if (isError) {
+      return `<div class="text-center py-8">
+        <h3 class="text-lg font-medium text-red-600 dark:text-red-400 mb-2">Analysis Failed</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">There was an error processing your code. This could be due to:</p>
+        <ul class="text-left mx-auto max-w-md space-y-2 text-gray-600 dark:text-gray-400 list-disc pl-5">
+          <li>Server or connectivity issues</li>
+          <li>The AI provider being temporarily unavailable</li>
+          <li>Problems parsing your code</li>
+        </ul>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Please try again later or make sure your code is valid.</p>
+      </div>`;
+    }
+    
     if (selectedTab === "analyze") {
       return `<div class="text-center py-8">
         <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Analysis Yet</h3>
@@ -850,8 +943,17 @@ const CodeReviewPage = () => {
                   className={`p-4 prose dark:prose-invert max-w-none ${styles.resultContainer}`}
                 >
                   {analysisResult ? (
-                    // If we have analysis results
-                    analysisResult.startsWith("<div") ? (
+                    // Check if it's an error message
+                    analysisResult.startsWith("Error") || 
+                    analysisResult.startsWith("Server error") ||
+                    analysisResult.startsWith("Provider error") ||
+                    analysisResult.startsWith("The code") ? (
+                      // Show the error message with nicer formatting
+                      <div
+                        dangerouslySetInnerHTML={{ __html: getPlaceholderText(true) }}
+                        className="text-red-500 dark:text-red-400"
+                      />
+                    ) : analysisResult.startsWith("<div") ? (
                       // If it's already HTML formatted, use dangerouslySetInnerHTML directly
                       <div
                         dangerouslySetInnerHTML={{ __html: analysisResult }}
