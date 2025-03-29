@@ -63,14 +63,14 @@ const codingQuestions = [
       "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
     tags: ["Stack", "String"],
   },
-  {
-    id: 3,
-    title: "Merge Two Sorted Lists",
-    difficulty: "Easy",
-    description:
-      "Merge two sorted linked lists and return it as a sorted list.",
-    tags: ["Linked List", "Recursion"],
-  },
+  // {
+  //   id: 3,
+  //   title: "Merge Two Sorted Lists",
+  //   difficulty: "Easy",
+  //   description:
+  //     "Merge two sorted linked lists and return it as a sorted list.",
+  //   tags: ["Linked List", "Recursion"],
+  // },
   {
     id: 4,
     title: "Maximum Subarray",
