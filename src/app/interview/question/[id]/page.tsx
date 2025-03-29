@@ -14,12 +14,13 @@ import {
   ExternalLink,
   CheckCircle,
   Lock,
+  Wand2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import createJudge0Client, { type SubmissionResult } from "@/lib/judge0";
 import CodeEditor from "@/components/ui/code-editor";
 import confetti from "canvas-confetti";
-import { apiPut, apiGet } from "@/lib/api";
+import { apiPut, apiGet, apiPost } from "@/lib/api";
 import { useSolutionStore } from "@/lib/store";
 
 // Mock data - in a real app, this would come from an API
@@ -372,6 +373,15 @@ function isValidObjectId(id: string | null): boolean {
   return /^[0-9a-fA-F]{24}$/.test(id);
 }
 
+// Interface for AI generated test cases
+interface AITestCase {
+  input: any;
+  expectedOutput: any;
+  purpose: string;
+  difficulty: string;
+  performanceTest: boolean;
+}
+
 const CodeQuestion = () => {
   const params = useParams();
   const router = useRouter();
@@ -389,6 +399,11 @@ const CodeQuestion = () => {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
   const [customTestCase, setCustomTestCase] = useState<string>("");
   const [completionTime, setCompletionTime] = useState<number>(0);
+  // New states for AI test case generation
+  const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false);
+  const [aiTestCases, setAiTestCases] = useState<AITestCase[]>([]);
+  const [isTestCaseModalOpen, setIsTestCaseModalOpen] = useState<boolean>(false);
+  const [selectedTestCase, setSelectedTestCase] = useState<AITestCase | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Create Judge0 client
@@ -1125,6 +1140,70 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
     }
   };
 
+  // Generate AI test cases
+  const generateAITestCases = async () => {
+    if (!question) return;
+    
+    setIsGeneratingTestCases(true);
+    setOutput("Generating AI test cases...");
+    
+    try {
+      // Get interviewId if available
+      let interviewId;
+      if (typeof window !== "undefined") {
+        interviewId = localStorage.getItem("currentInterviewId");
+        if (!interviewId) {
+          const urlParams = new URLSearchParams(window.location.search);
+          interviewId = urlParams.get("interviewId");
+        }
+      }
+      
+      // Prepare data for API call
+      const payload = {
+        problemStatement: question.fullDescription,
+        constraints: question.testCases,
+        solutionHint: question.solutionHint,
+        problemId: question.id,
+        interviewId: interviewId || undefined,
+        questionId: question.id
+      };
+      
+      // Call API to generate test cases
+      const response = await apiPost<{
+        success: boolean;
+        message: string;
+        data: {
+          testCases: AITestCase[];
+          testCasesText: string;
+          fromCache: boolean;
+        };
+      }>('/api/ai/generate-test-cases', payload);
+      
+      if (response.success && response.data.testCases) {
+        setAiTestCases(response.data.testCases);
+        setIsTestCaseModalOpen(true);
+        
+        // Add explanation to output
+        setOutput(`AI Test Cases Generated Successfully!\n\n${response.data.testCasesText}`);
+      } else {
+        setOutput("Failed to generate AI test cases. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error generating AI test cases:", error);
+      setOutput(`Error generating AI test cases: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsGeneratingTestCases(false);
+    }
+  };
+  
+  // Apply selected test case to input field
+  const applySelectedTestCase = () => {
+    if (selectedTestCase) {
+      setCustomTestCase(JSON.stringify(selectedTestCase.input, null, 2));
+      setIsTestCaseModalOpen(false);
+    }
+  };
+
   if (!question) {
     return <div className="p-8">Question not found!</div>;
   }
@@ -1304,6 +1383,15 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                           className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Run Custom Test
+                        </button>
+                        {/* Add AI test case generation button */}
+                        <button
+                          onClick={generateAITestCases}
+                          disabled={isGeneratingTestCases || isRunning || isSubmitting}
+                          className="text-sm bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                        >
+                          <Wand2 className="w-3 h-3 mr-1" />
+                          {isGeneratingTestCases ? "Generating..." : "AI Test Cases"}
                         </button>
                       </div>
                     </div>
@@ -1505,6 +1593,78 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
               </button>
             )}
           </motion.div>
+        </div>
+      </Modal>
+
+      {/* AI Test Cases Modal */}
+      <Modal
+        isOpen={isTestCaseModalOpen}
+        onClose={() => setIsTestCaseModalOpen(false)}
+        title="AI Generated Test Cases"
+      >
+        <div className="max-h-96 overflow-y-auto">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Select a test case to use:
+          </p>
+          <div className="space-y-4">
+            {aiTestCases.map((testCase, index) => (
+              <div 
+                key={index}
+                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                  selectedTestCase === testCase 
+                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' 
+                    : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
+                }`}
+                onClick={() => setSelectedTestCase(testCase)}
+              >
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">Test Case {index + 1}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs ${
+                    testCase.difficulty === 'easy' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                      : testCase.difficulty === 'medium'
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                        : testCase.difficulty === 'hard'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+                  }`}>
+                    {testCase.difficulty.charAt(0).toUpperCase() + testCase.difficulty.slice(1)}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  {testCase.purpose}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Input:</div>
+                    <div className="font-mono text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded overflow-auto max-h-24">
+                      {JSON.stringify(testCase.input, null, 2)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expected Output:</div>
+                    <div className="font-mono text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded overflow-auto max-h-24">
+                      {JSON.stringify(testCase.expectedOutput, null, 2)}
+                    </div>
+                  </div>
+                </div>
+                {testCase.performanceTest && (
+                  <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                    ⚡ Performance Test
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={applySelectedTestCase}
+              disabled={!selectedTestCase}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Apply Selected Test Case
+            </button>
+          </div>
         </div>
       </Modal>
     </div>
