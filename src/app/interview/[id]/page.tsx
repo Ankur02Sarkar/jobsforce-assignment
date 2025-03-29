@@ -1,25 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import CodeEditor from "@/components/ui/code-editor";
 import { apiGet, apiPut } from "@/lib/api";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   CalendarIcon,
+  CheckSquare,
+  ChevronDown,
+  ChevronUp,
   ClockIcon,
   Code,
   ExternalLink,
-  PlayCircle,
-  CheckSquare,
-  XSquare,
-  ChevronDown,
-  ChevronUp,
   Eye,
   EyeOff,
+  PlayCircle,
+  XSquare,
 } from "lucide-react";
-import CodeEditor from "@/components/ui/code-editor";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 // Interview type definition based on backend model
 interface Interview {

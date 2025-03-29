@@ -1,14 +1,14 @@
 "use client";
 import { apiPost } from "@/lib/api";
 import { useLoading } from "@/lib/useLoading";
+import { ExternalLink, MapPin, Search } from "lucide-react";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { ExternalLink, MapPin, Search } from "lucide-react";
 
-import JobSearchForm from "./JobSearchForm";
+import { Briefcase } from "lucide-react";
 import JobCard from "./JobCard";
 import JobModal from "./JobModal";
-import { Briefcase } from "lucide-react";
+import JobSearchForm from "./JobSearchForm";
 
 interface JobCore {
   title: string;

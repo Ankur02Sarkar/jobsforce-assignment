@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import CodeEditor from "@/components/ui/code-editor";
 import { SparklesCore } from "@/components/ui/sparkles";
-import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { IconDotsVertical } from "@tabler/icons-react";
-import CodeEditor from "@/components/ui/code-editor";
+import { AnimatePresence, motion } from "motion/react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 interface CodeCompareProps {
   firstCode: string;
@@ -89,7 +89,7 @@ export const CodeCompare = ({
         setIsDragging(true);
       }
     },
-    [slideMode]
+    [slideMode],
   );
 
   const handleEnd = useCallback(() => {
@@ -110,17 +110,17 @@ export const CodeCompare = ({
         });
       }
     },
-    [slideMode, isDragging]
+    [slideMode, isDragging],
   );
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => handleStart(e.clientX),
-    [handleStart]
+    [handleStart],
   );
   const handleMouseUp = useCallback(() => handleEnd(), [handleEnd]);
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => handleMove(e.clientX),
-    [handleMove]
+    [handleMove],
   );
 
   const handleTouchStart = useCallback(
@@ -129,7 +129,7 @@ export const CodeCompare = ({
         handleStart(e.touches[0].clientX);
       }
     },
-    [handleStart, autoplay]
+    [handleStart, autoplay],
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -144,7 +144,7 @@ export const CodeCompare = ({
         handleMove(e.touches[0].clientX);
       }
     },
-    [handleMove, autoplay]
+    [handleMove, autoplay],
   );
 
   const emptyChangeHandler = (value: string) => {
@@ -233,4 +233,4 @@ export const CodeCompare = ({
   );
 };
 
-const MemoizedSparklesCore = React.memo(SparklesCore); 
+const MemoizedSparklesCore = React.memo(SparklesCore);

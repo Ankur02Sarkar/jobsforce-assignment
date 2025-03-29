@@ -1,5 +1,5 @@
+import { Briefcase, MapPin, Search } from "lucide-react";
 import { useState } from "react";
-import { Search, MapPin, Briefcase } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface JobSearchFormProps {

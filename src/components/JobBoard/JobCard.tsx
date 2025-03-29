@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { MapPin, Briefcase, ExternalLink, Clock } from "lucide-react";
+import { Briefcase, Clock, ExternalLink, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export interface JobItem {

@@ -1,8 +1,8 @@
 "use client";
 
+import Editor from "@monaco-editor/react";
 import type React from "react";
 import { useState } from "react";
-import Editor from "@monaco-editor/react";
 
 type CodeEditorProps = {
   value: string;

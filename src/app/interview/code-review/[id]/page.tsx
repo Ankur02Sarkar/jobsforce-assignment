@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Code, BarChart2, Zap, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import CompareItems from "@/components/CompareItems";
 import CodeEditor from "@/components/ui/code-editor";
 import { apiPost } from "@/lib/api";
 import { useSolutionStore } from "@/lib/store";
+import { motion } from "framer-motion";
+import { ArrowLeft, BarChart2, Code, Loader2, Zap } from "lucide-react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import styles from "./code-review.module.css";
-import CompareItems from "@/components/CompareItems";
 
 // Tabs for different analyses
 type AnalysisTab = "analyze" | "complexity" | "optimize";
@@ -141,10 +141,11 @@ const CodeReviewPage = () => {
 
         if (result.success) {
           // Check if the analysis failed based on error patterns in the response
-          const isFailedAnalysis = 
+          const isFailedAnalysis =
             result.data.analysisText === "Error performing code analysis" ||
-            result.data.algorithmAnalysis?.approachIdentified === "Analysis failed";
-          
+            result.data.algorithmAnalysis?.approachIdentified ===
+              "Analysis failed";
+
           if (isFailedAnalysis) {
             console.error("Analysis failed:", result.data);
             setAnalysisResult(`
@@ -347,11 +348,14 @@ const CodeReviewPage = () => {
 
         if (result.success) {
           // Check if the complexity analysis failed based on error patterns
-          const isFailedAnalysis = 
-            result.data.analysisText === "Error performing complexity analysis" || 
-            (result.data.complexityAnalysis?.timeComplexity?.worstCase === "Analysis failed" &&
-             result.data.complexityAnalysis?.spaceComplexity === "Analysis failed");
-          
+          const isFailedAnalysis =
+            result.data.analysisText ===
+              "Error performing complexity analysis" ||
+            (result.data.complexityAnalysis?.timeComplexity?.worstCase ===
+              "Analysis failed" &&
+              result.data.complexityAnalysis?.spaceComplexity ===
+                "Analysis failed");
+
           if (isFailedAnalysis) {
             console.error("Complexity analysis failed:", result.data);
             setAnalysisResult(`
@@ -527,10 +531,12 @@ const CodeReviewPage = () => {
 
         if (result.success) {
           // Check if the optimization failed based on error patterns
-          const isFailedOptimization = 
-            result.data.optimizationText === "Error performing code optimization" ||
-            result.data.optimizationSuggestions?.optimizedCode === "Optimization failed";
-          
+          const isFailedOptimization =
+            result.data.optimizationText ===
+              "Error performing code optimization" ||
+            result.data.optimizationSuggestions?.optimizedCode ===
+              "Optimization failed";
+
           if (isFailedOptimization) {
             console.error("Optimization failed:", result.data);
             setAnalysisResult(`
@@ -661,13 +667,13 @@ const CodeReviewPage = () => {
       // Get detailed error message if available
       let errorMessage =
         "Error occurred during analysis. Please try again later.";
-      
+
       // Handle different types of errors
       if (error instanceof Error) {
         errorMessage = `Error: ${error.message}`;
       } else if (typeof error === "object" && error !== null) {
         const errorObj = error as any;
-        
+
         // Check for API response errors
         if (errorObj.response?.data?.message) {
           errorMessage = `Server error: ${errorObj.response.data.message}`;
@@ -678,7 +684,9 @@ const CodeReviewPage = () => {
         // Check for provider errors (Google, OpenAI, etc.)
         if (errorObj.response?.data?.error?.metadata?.raw) {
           try {
-            const rawError = JSON.parse(errorObj.response.data.error.metadata.raw);
+            const rawError = JSON.parse(
+              errorObj.response.data.error.metadata.raw,
+            );
             if (rawError.error?.message) {
               errorMessage = `Provider error: ${rawError.error.message}`;
               console.error("Provider error details:", rawError.error);
@@ -718,7 +726,7 @@ const CodeReviewPage = () => {
         <p class="mt-4 text-gray-600 dark:text-gray-400">Please try again later or make sure your code is valid.</p>
       </div>`;
     }
-    
+
     if (selectedTab === "analyze") {
       return `<div class="text-center py-8">
         <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Analysis Yet</h3>
@@ -944,13 +952,15 @@ const CodeReviewPage = () => {
                 >
                   {analysisResult ? (
                     // Check if it's an error message
-                    analysisResult.startsWith("Error") || 
+                    analysisResult.startsWith("Error") ||
                     analysisResult.startsWith("Server error") ||
                     analysisResult.startsWith("Provider error") ||
                     analysisResult.startsWith("The code") ? (
                       // Show the error message with nicer formatting
                       <div
-                        dangerouslySetInnerHTML={{ __html: getPlaceholderText(true) }}
+                        dangerouslySetInnerHTML={{
+                          __html: getPlaceholderText(true),
+                        }}
                         className="text-red-500 dark:text-red-400"
                       />
                     ) : analysisResult.startsWith("<div") ? (

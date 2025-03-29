@@ -1,24 +1,24 @@
 "use client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import type { JobItem } from "./JobCard";
+import { apiPost } from "@/lib/api";
+import { format } from "date-fns";
 import {
   Briefcase,
-  MapPin,
-  CalendarDays,
   Building,
+  CalendarDays,
   ExternalLink,
+  MapPin,
   X,
 } from "lucide-react";
-import { format } from "date-fns";
-import { useEffect, useState } from "react";
-import { apiPost } from "@/lib/api";
 import { AnimatePresence, motion } from "motion/react";
-import { Button } from "../ui/button";
-import JobDescription from "./JobDescription";
 import Image from "next/image";
-import CompanyLogo from "./CompanyLogo";
-import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Button } from "../ui/button";
+import CompanyLogo from "./CompanyLogo";
+import type { JobItem } from "./JobCard";
+import JobDescription from "./JobDescription";
 
 interface JobModalProps {
   job: JobItem | null;

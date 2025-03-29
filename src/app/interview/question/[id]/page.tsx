@@ -1,27 +1,27 @@
 "use client";
 
-import type React from "react";
-import { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import CodeEditor from "@/components/ui/code-editor";
+import { apiGet, apiPost, apiPut } from "@/lib/api";
+import createJudge0Client, { type SubmissionResult } from "@/lib/judge0";
+import { useSolutionStore } from "@/lib/store";
 import axios from "axios";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import confetti from "canvas-confetti";
+import { motion } from "framer-motion";
 import {
-  Code,
-  PlayCircle,
   ArrowLeft,
-  Clock,
-  Save,
-  ExternalLink,
   CheckCircle,
+  Clock,
+  Code,
+  ExternalLink,
   Lock,
+  PlayCircle,
+  Save,
   Wand2,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import createJudge0Client, { type SubmissionResult } from "@/lib/judge0";
-import CodeEditor from "@/components/ui/code-editor";
-import confetti from "canvas-confetti";
-import { apiPut, apiGet, apiPost } from "@/lib/api";
-import { useSolutionStore } from "@/lib/store";
+import { useParams, useRouter } from "next/navigation";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 // Mock data - in a real app, this would come from an API
 const codingQuestions = [
@@ -309,7 +309,587 @@ public:
     solutionHint:
       "Use a stack to track opening brackets and verify matching closing brackets in the correct order.",
   },
-  // ... other questions
+  {
+    id: 3,
+    title: "Merge Two Sorted Lists",
+    difficulty: "Easy",
+    description:
+      "Merge two sorted linked lists and return it as a sorted list.",
+    fullDescription: `
+# Merge Two Sorted Lists
+
+## Problem Statement
+You are given the heads of two sorted linked lists \`list1\` and \`list2\`.
+Merge the two lists into one **sorted** list. The list should be made by splicing together the nodes of the first two lists.
+Return the head of the merged linked list.
+
+## Examples
+Example 1:
+Input: list1 = [1,2,4], list2 = [1,3,4]
+Output: [1,1,2,3,4,4]
+
+Example 2:
+Input: list1 = [], list2 = []
+Output: []
+
+Example 3:
+Input: list1 = [], list2 = [0]
+Output: [0]
+
+## Constraints
+- The number of nodes in both lists is in the range [0, 50].
+- -100 <= Node.val <= 100
+- Both \`list1\` and \`list2\` are sorted in **non-decreasing** order.
+    `,
+    testCases: [
+      {
+        input: {
+          list1: { val: 1, next: { val: 2, next: { val: 4, next: null } } },
+          list2: { val: 1, next: { val: 3, next: { val: 4, next: null } } },
+        },
+        output: {
+          val: 1,
+          next: {
+            val: 1,
+            next: {
+              val: 2,
+              next: { val: 3, next: { val: 4, next: { val: 4, next: null } } },
+            },
+          },
+        },
+        displayInput: "list1 = [1,2,4], list2 = [1,3,4]",
+        displayOutput: "[1,1,2,3,4,4]",
+      },
+      {
+        input: { list1: null, list2: null },
+        output: null,
+        displayInput: "list1 = [], list2 = []",
+        displayOutput: "[]",
+      },
+      {
+        input: { list1: null, list2: { val: 0, next: null } },
+        output: { val: 0, next: null },
+        displayInput: "list1 = [], list2 = [0]",
+        displayOutput: "[0]",
+      },
+    ],
+    // Note: Linked list input/output requires special handling in runners.
+    // The `runTestCase` functions below assume a utility to convert arrays to lists and lists to arrays.
+    // For simplicity, we'll use placeholder definitions here.
+    startingCode: {
+      javascript: `/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+function mergeTwoLists(list1, list2) {
+    // Your code here
+};
+
+// Example usage - DO NOT MODIFY THIS (Assumes helper functions arrayToList and listToArray exist)
+function runTestCase(input) {
+    // const l1 = arrayToList(input.list1_arr); // Utility to convert array to ListNode
+    // const l2 = arrayToList(input.list2_arr); // Utility to convert array to ListNode
+    // const mergedList = mergeTwoLists(l1, l2);
+    // return listToArray(mergedList); // Utility to convert ListNode back to array for comparison
+    // Placeholder for demonstration as runners might handle list serialization differently
+    return "Output representation depends on test runner implementation for lists";
+}`,
+      python: `# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+def mergeTwoLists(list1, list2):
+    # Your code here
+    pass
+
+# Example usage - DO NOT MODIFY THIS (Assumes helper functions arrayToList and listToArray exist)
+def runTestCase(input):
+    # l1 = arrayToList(input["list1_arr"]) # Utility to convert array to ListNode
+    # l2 = arrayToList(input["list2_arr"]) # Utility to convert array to ListNode
+    # mergedList = mergeTwoLists(l1, l2)
+    # return listToArray(mergedList) # Utility to convert ListNode back to array for comparison
+    # Placeholder for demonstration as runners might handle list serialization differently
+    return "Output representation depends on test runner implementation for lists"`,
+      java: `/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        // Your code here
+        return null;
+    }
+
+    // Example usage - DO NOT MODIFY THIS (Assumes helper functions arrayToList and listToArray exist)
+    public static Object runTestCase(java.util.Map<String, Object> input) {
+        // ListNode l1 = arrayToList((int[])input.get("list1_arr")); // Utility to convert array to ListNode
+        // ListNode l2 = arrayToList((int[])input.get("list2_arr")); // Utility to convert array to ListNode
+        // ListNode mergedList = new Solution().mergeTwoLists(l1, l2);
+        // return listToArray(mergedList); // Utility to convert ListNode back to array for comparison
+        // Placeholder for demonstration as runners might handle list serialization differently
+        return "Output representation depends on test runner implementation for lists";
+    }
+}`,
+      cpp: `/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+#include <vector>
+#include <map>
+#include <string> // Include necessary header for string
+using namespace std; // Use std namespace
+
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        // Your code here
+        return nullptr;
+    }
+
+    // Example usage - DO NOT MODIFY THIS (Assumes helper functions arrayToList and listToArray exist)
+    static string runTestCase(map<string, void*> input) {
+        // ListNode* l1 = arrayToList(static_cast<vector<int>*>(input["list1_arr"])); // Utility
+        // ListNode* l2 = arrayToList(static_cast<vector<int>*>(input["list2_arr"])); // Utility
+        // ListNode* mergedList = Solution().mergeTwoLists(l1, l2);
+        // return listToArray(mergedList); // Utility returning string representation
+        // Placeholder for demonstration as runners might handle list serialization differently
+        return "Output representation depends on test runner implementation for lists";
+    }
+};`,
+    },
+    sampleSolution: {
+      javascript: `function mergeTwoLists(list1, list2) {
+    if (!list1) return list2;
+    if (!list2) return list1;
+
+    let head;
+    if (list1.val < list2.val) {
+        head = list1;
+        list1 = list1.next;
+    } else {
+        head = list2;
+        list2 = list2.next;
+    }
+
+    let current = head;
+    while (list1 && list2) {
+        if (list1.val < list2.val) {
+            current.next = list1;
+            list1 = list1.next;
+        } else {
+            current.next = list2;
+            list2 = list2.next;
+        }
+        current = current.next;
+    }
+
+    if (list1) {
+        current.next = list1;
+    } else if (list2) {
+        current.next = list2;
+    }
+
+    return head;
+};`,
+      python: `def mergeTwoLists(list1, list2):
+    if not list1:
+        return list2
+    if not list2:
+        return list1
+
+    if list1.val < list2.val:
+        head = list1
+        list1 = list1.next
+    else:
+        head = list2
+        list2 = list2.next
+    
+    current = head
+    while list1 and list2:
+        if list1.val < list2.val:
+            current.next = list1
+            list1 = list1.next
+        else:
+            current.next = list2
+            list2 = list2.next
+        current = current.next
+        
+    if list1:
+        current.next = list1
+    elif list2:
+        current.next = list2
+        
+    return head`,
+    },
+    tags: ["Linked List", "Recursion"],
+    problemType: "Linked List",
+    solutionHint:
+      "Iteratively compare nodes from both lists and append the smaller one to the result list. Alternatively, use recursion.",
+  },
+  {
+    id: 4,
+    title: "Maximum Subarray",
+    difficulty: "Medium", // Updated from Easy in interview page
+    description:
+      "Find the contiguous subarray within an array (containing at least one number) which has the largest sum.",
+    fullDescription: `
+# Maximum Subarray
+
+## Problem Statement
+Given an integer array \`nums\`, find the contiguous subarray (containing at least one number) which has the largest sum and return *its sum*.
+A **subarray** is a **contiguous** part of an array.
+
+## Examples
+Example 1:
+Input: nums = [-2,1,-3,4,-1,2,1,-5,4]
+Output: 6
+Explanation: The subarray [4,-1,2,1] has the largest sum 6.
+
+Example 2:
+Input: nums = [1]
+Output: 1
+Explanation: The subarray [1] has the largest sum 1.
+
+Example 3:
+Input: nums = [5,4,-1,7,8]
+Output: 23
+Explanation: The subarray [5,4,-1,7,8] has the largest sum 23.
+
+## Constraints
+- \`1 <= nums.length <= 10^5\`
+- \`-10^4 <= nums[i] <= 10^4\`
+
+## Follow-up
+If you have figured out the O(n) solution, try coding another solution using the **divide and conquer** approach, which is more subtle.
+    `,
+    testCases: [
+      {
+        input: { nums: [-2, 1, -3, 4, -1, 2, 1, -5, 4] },
+        output: 6,
+        displayInput: "nums = [-2,1,-3,4,-1,2,1,-5,4]",
+        displayOutput: "6",
+      },
+      {
+        input: { nums: [1] },
+        output: 1,
+        displayInput: "nums = [1]",
+        displayOutput: "1",
+      },
+      {
+        input: { nums: [5, 4, -1, 7, 8] },
+        output: 23,
+        displayInput: "nums = [5,4,-1,7,8]",
+        displayOutput: "23",
+      },
+      {
+        input: { nums: [-1] },
+        output: -1,
+        displayInput: "nums = [-1]",
+        displayOutput: "-1",
+      },
+      {
+        input: { nums: [-2, -1] },
+        output: -1,
+        displayInput: "nums = [-2, -1]",
+        displayOutput: "-1",
+      },
+    ],
+    startingCode: {
+      javascript: `function maxSubArray(nums) {
+    // Your code here
+};
+
+// Example usage - DO NOT MODIFY THIS
+function runTestCase(input) {
+    return maxSubArray(input.nums);
+}`,
+      python: `def maxSubArray(nums):
+    # Your code here
+    pass
+
+# Example usage - DO NOT MODIFY THIS
+def runTestCase(input):
+    return maxSubArray(input["nums"])`,
+      java: `class Solution {
+    public int maxSubArray(int[] nums) {
+        // Your code here
+        return 0;
+    }
+
+    // Example usage - DO NOT MODIFY THIS
+    public static int runTestCase(java.util.Map<String, Object> input) {
+        int[] nums = (int[])input.get("nums");
+        return new Solution().maxSubArray(nums);
+    }
+}`,
+      cpp: `#include <vector>
+#include <map>
+#include <string> // Include necessary header
+#include <limits> // Include for numeric_limits
+#include <algorithm> // Include for max
+using namespace std; // Use std namespace
+
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        // Your code here
+        return 0;
+    }
+
+    // Example usage - DO NOT MODIFY THIS
+    static int runTestCase(map<string, void*> input) {
+        vector<int>* nums = static_cast<vector<int>*>(input["nums"]);
+        return Solution().maxSubArray(*nums);
+    }
+};`,
+    },
+    sampleSolution: {
+      javascript: `function maxSubArray(nums) {
+    let maxSoFar = -Infinity;
+    let maxEndingHere = 0;
+
+    for (let i = 0; i < nums.length; i++) {
+        maxEndingHere = maxEndingHere + nums[i];
+        if (maxSoFar < maxEndingHere) {
+            maxSoFar = maxEndingHere;
+        }
+        if (maxEndingHere < 0) {
+            maxEndingHere = 0;
+        }
+    }
+    // Handle case where all numbers are negative
+     if (maxSoFar === -Infinity) {
+        maxSoFar = nums[0];
+        for (let i = 1; i < nums.length; i++) {
+            maxSoFar = Math.max(maxSoFar, nums[i]);
+        }
+    } else if (nums.length > 0 && maxSoFar < 0) {
+         // Check if the largest single element is greater than maxSoFar if maxSoFar is negative
+        let largestSingle = nums[0];
+        for (let i = 1; i < nums.length; i++) {
+            largestSingle = Math.max(largestSingle, nums[i]);
+        }
+         maxSoFar = Math.max(maxSoFar, largestSingle)
+    }
+
+
+    return maxSoFar;
+};`,
+      python: `import math
+
+def maxSubArray(nums):
+    max_so_far = -math.inf
+    max_ending_here = 0
+    
+    for x in nums:
+        max_ending_here = max_ending_here + x
+        if max_so_far < max_ending_here:
+            max_so_far = max_ending_here
+        if max_ending_here < 0:
+            max_ending_here = 0
+            
+    # If all numbers are negative, max_so_far might remain -inf or 0 if initialized to 0.
+    # Kadane's algorithm as described often needs adjustment for all-negative arrays.
+    # A simple fix is to return the max element if max_so_far is still the initial negative infinity,
+    # or handle it by ensuring max_so_far tracks the largest single element if all sums are negative.
+    if not nums:
+        return 0 # Or raise error based on constraints
+    
+    # Correct handling for all negative numbers:
+    current_max = nums[0]
+    global_max = nums[0]
+    for i in range(1, len(nums)):
+        current_max = max(nums[i], current_max + nums[i])
+        if current_max > global_max:
+            global_max = current_max
+            
+    return global_max
+`,
+    },
+    tags: ["Array", "Dynamic Programming", "Divide and Conquer"], // Added Divide and Conquer
+    problemType: "Dynamic Programming",
+    solutionHint:
+      "Use Kadane's algorithm: keep track of the maximum sum ending at the current position and the overall maximum sum found so far.",
+  },
+  {
+    id: 5,
+    title: "Longest Palindromic Substring",
+    difficulty: "Medium",
+    description:
+      "Given a string s, return the longest palindromic substring in s.",
+    fullDescription: `
+# Longest Palindromic Substring
+
+## Problem Statement
+Given a string \`s\`, return the longest palindromic substring in \`s\`.
+A string is **palindromic** if it reads the same forward and backward.
+A **substring** is a contiguous sequence of characters within the string.
+
+## Examples
+Example 1:
+Input: s = "babad"
+Output: "bab"
+Explanation: "aba" is also a valid answer.
+
+Example 2:
+Input: s = "cbbd"
+Output: "bb"
+
+## Constraints
+- \`1 <= s.length <= 1000\`
+- \`s\` consist of only digits and English letters.
+    `,
+    testCases: [
+      {
+        input: { s: "babad" },
+        output: ["bab", "aba"], // Accept multiple valid outputs
+        displayInput: 's = "babad"',
+        displayOutput: '"bab" or "aba"',
+      },
+      {
+        input: { s: "cbbd" },
+        output: ["bb"],
+        displayInput: 's = "cbbd"',
+        displayOutput: '"bb"',
+      },
+      {
+        input: { s: "a" },
+        output: ["a"],
+        displayInput: 's = "a"',
+        displayOutput: '"a"',
+      },
+      {
+        input: { s: "ac" },
+        output: ["a", "c"],
+        displayInput: 's = "ac"',
+        displayOutput: '"a" or "c"',
+      },
+      {
+        input: { s: "racecar" },
+        output: ["racecar"],
+        displayInput: 's = "racecar"',
+        displayOutput: '"racecar"',
+      },
+    ],
+    startingCode: {
+      javascript: `function longestPalindrome(s) {
+    // Your code here
+};
+
+// Example usage - DO NOT MODIFY THIS
+function runTestCase(input) {
+    return longestPalindrome(input.s);
+}`,
+      python: `def longestPalindrome(s):
+    # Your code here
+    pass
+
+# Example usage - DO NOT MODIFY THIS
+def runTestCase(input):
+    return longestPalindrome(input["s"])`,
+      java: `class Solution {
+    public String longestPalindrome(String s) {
+        // Your code here
+        return "";
+    }
+
+    // Example usage - DO NOT MODIFY THIS
+    public static String runTestCase(java.util.Map<String, Object> input) {
+        String s = (String)input.get("s");
+        return new Solution().longestPalindrome(s);
+    }
+}`,
+      cpp: `#include <string>
+#include <vector>
+#include <map>
+using namespace std;
+
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        // Your code here
+        return "";
+    }
+
+    // Example usage - DO NOT MODIFY THIS
+    static string runTestCase(map<string, void*> input) {
+        string* s = static_cast<string*>(input["s"]);
+        return Solution().longestPalindrome(*s);
+    }
+};`,
+    },
+    sampleSolution: {
+      javascript: `function longestPalindrome(s) {
+    if (!s || s.length < 1) return "";
+    
+    let start = 0;
+    let end = 0;
+
+    function expandAroundCenter(left, right) {
+        while (left >= 0 && right < s.length && s[left] === s[right]) {
+            if (right - left + 1 > end - start) {
+                start = left;
+                end = right + 1; // end is exclusive for slice
+            }
+            left--;
+            right++;
+        }
+    }
+
+    for (let i = 0; i < s.length; i++) {
+        expandAroundCenter(i, i);     // Odd length palindromes
+        expandAroundCenter(i, i + 1); // Even length palindromes
+    }
+
+    return s.substring(start, end);
+};`,
+      python: `def longestPalindrome(s):
+    if not s:
+        return ""
+    
+    n = len(s)
+    start, max_len = 0, 1
+
+    # Helper function to expand around center
+    def expand_around_center(left, right):
+        nonlocal start, max_len
+        while left >= 0 and right < n and s[left] == s[right]:
+            if right - left + 1 > max_len:
+                max_len = right - left + 1
+                start = left
+            left -= 1
+            right += 1
+
+    for i in range(n):
+        # Odd length palindromes
+        expand_around_center(i, i)
+        # Even length palindromes
+        expand_around_center(i, i + 1)
+        
+    return s[start:start + max_len]
+`,
+    },
+    tags: ["String", "Dynamic Programming", "Two Pointers"], // Added Two Pointers
+    problemType: "Dynamic Programming",
+    solutionHint:
+      "Expand around the center for each character (and between characters) to find the longest palindrome efficiently.",
+  },
 ];
 
 interface LanguageOption {
@@ -403,10 +983,14 @@ const CodeQuestion = () => {
   const [customTestCase, setCustomTestCase] = useState<string>("");
   const [completionTime, setCompletionTime] = useState<number>(0);
   // New states for AI test case generation
-  const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false);
+  const [isGeneratingTestCases, setIsGeneratingTestCases] =
+    useState<boolean>(false);
   const [aiTestCases, setAiTestCases] = useState<AITestCase[]>([]);
-  const [isTestCaseModalOpen, setIsTestCaseModalOpen] = useState<boolean>(false);
-  const [selectedTestCase, setSelectedTestCase] = useState<AITestCase | null>(null);
+  const [isTestCaseModalOpen, setIsTestCaseModalOpen] =
+    useState<boolean>(false);
+  const [selectedTestCase, setSelectedTestCase] = useState<AITestCase | null>(
+    null,
+  );
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Create Judge0 client
@@ -1146,10 +1730,10 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
   // Generate AI test cases
   const generateAITestCases = async () => {
     if (!question) return;
-    
+
     setIsGeneratingTestCases(true);
     setOutput("Generating AI test cases...");
-    
+
     try {
       // Get interviewId if available
       let interviewId;
@@ -1160,7 +1744,7 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
           interviewId = urlParams.get("interviewId");
         }
       }
-      
+
       // Prepare data for API call
       const payload = {
         problemStatement: question.fullDescription,
@@ -1168,9 +1752,9 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
         solutionHint: question.solutionHint,
         problemId: question.id,
         interviewId: interviewId || undefined,
-        questionId: question.id
+        questionId: question.id,
       };
-      
+
       // Call API to generate test cases
       const response = await apiPost<{
         success: boolean;
@@ -1180,25 +1764,29 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
           testCasesText: string;
           fromCache: boolean;
         };
-      }>('/api/ai/generate-test-cases', payload);
-      
+      }>("/api/ai/generate-test-cases", payload);
+
       if (response.success && response.data.testCases) {
         setAiTestCases(response.data.testCases);
         setIsTestCaseModalOpen(true);
-        
+
         // Add explanation to output
-        setOutput(`AI Test Cases Generated Successfully!\n\n${response.data.testCasesText}`);
+        setOutput(
+          `AI Test Cases Generated Successfully!\n\n${response.data.testCasesText}`,
+        );
       } else {
         setOutput("Failed to generate AI test cases. Please try again.");
       }
     } catch (error) {
       console.error("Error generating AI test cases:", error);
-      setOutput(`Error generating AI test cases: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setOutput(
+        `Error generating AI test cases: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsGeneratingTestCases(false);
     }
   };
-  
+
   // Apply selected test case to input field
   const applySelectedTestCase = () => {
     if (selectedTestCase) {
@@ -1390,11 +1978,15 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                         {/* Add AI test case generation button */}
                         <button
                           onClick={generateAITestCases}
-                          disabled={isGeneratingTestCases || isRunning || isSubmitting}
+                          disabled={
+                            isGeneratingTestCases || isRunning || isSubmitting
+                          }
                           className="text-sm bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                         >
                           <Wand2 className="w-3 h-3 mr-1" />
-                          {isGeneratingTestCases ? "Generating..." : "AI Test Cases"}
+                          {isGeneratingTestCases
+                            ? "Generating..."
+                            : "AI Test Cases"}
                         </button>
                       </div>
                     </div>
@@ -1620,27 +2212,30 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
           </p>
           <div className="space-y-4">
             {aiTestCases.map((testCase, index) => (
-              <div 
+              <div
                 key={index}
                 className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                  selectedTestCase === testCase 
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' 
-                    : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
+                  selectedTestCase === testCase
+                    ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700"
                 }`}
                 onClick={() => setSelectedTestCase(testCase)}
               >
                 <div className="flex justify-between mb-2">
                   <span className="font-medium">Test Case {index + 1}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    testCase.difficulty === 'easy' 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                      : testCase.difficulty === 'medium'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                        : testCase.difficulty === 'hard'
-                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                          : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
-                  }`}>
-                    {testCase.difficulty.charAt(0).toUpperCase() + testCase.difficulty.slice(1)}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs ${
+                      testCase.difficulty === "easy"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        : testCase.difficulty === "medium"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                          : testCase.difficulty === "hard"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                            : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                    }`}
+                  >
+                    {testCase.difficulty.charAt(0).toUpperCase() +
+                      testCase.difficulty.slice(1)}
                   </span>
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
@@ -1648,13 +2243,17 @@ Status: ${result.passed ? "✅ Passed" : "❌ Failed"}`,
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Input:</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      Input:
+                    </div>
                     <div className="font-mono text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded overflow-auto max-h-24">
                       {JSON.stringify(testCase.input, null, 2)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expected Output:</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      Expected Output:
+                    </div>
                     <div className="font-mono text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded overflow-auto max-h-24">
                       {JSON.stringify(testCase.expectedOutput, null, 2)}
                     </div>

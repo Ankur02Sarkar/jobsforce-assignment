@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
 import { apiGet } from "@/lib/api";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface InterviewResponse {
   success: boolean;
@@ -21,8 +21,10 @@ export default function JobInterviewPage() {
     const getOrCreateInterview = async () => {
       try {
         // Call the backend endpoint to get or create an interview for this job
-        const response = await apiGet<InterviewResponse>(`/api/interviews/job/${jobId}`);
-        
+        const response = await apiGet<InterviewResponse>(
+          `/api/interviews/job/${jobId}`,
+        );
+
         if (response.success && response.data._id) {
           // Redirect to the interview page with the interview ID
           router.push(`/interview/${response.data._id}`);
@@ -58,4 +60,4 @@ export default function JobInterviewPage() {
       </div>
     </div>
   );
-} 
+}
