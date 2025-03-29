@@ -9,6 +9,7 @@ import { ArrowLeft, BarChart2, Code, Loader2, Zap } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./code-review.module.css";
+import { formatCode } from "@/components/ui/code-editor";
 
 // Tabs for different analyses
 type AnalysisTab = "analyze" | "complexity" | "optimize";
@@ -644,18 +645,37 @@ const CodeReviewPage = () => {
                 "");
 
           if (optimizedCodeText) {
-            setOptimizedCode(optimizedCodeText);
-          }
-
-          // Store in Zustand and mark as analyzed
-          if (interviewId) {
-            storeOptimizationResult(interviewId, {
-              optimizationText: result.data.optimizationText,
-              optimizationSuggestions: result.data.optimizationSuggestions,
-              formattedAnalysis,
-              optimizedCode: optimizedCodeText,
-            });
-            setHasRunAnalysis((prev) => ({ ...prev, optimize: true }));
+            // Format the code before setting it
+            try {
+              // Format the optimized code
+              const formattedCode = await formatCode(optimizedCodeText, language);
+              setOptimizedCode(formattedCode);
+              
+              // Also update the stored result with the formatted code
+              if (interviewId) {
+                storeOptimizationResult(interviewId, {
+                  optimizationText: result.data.optimizationText,
+                  optimizationSuggestions: result.data.optimizationSuggestions,
+                  formattedAnalysis,
+                  optimizedCode: formattedCode,
+                });
+                setHasRunAnalysis((prev) => ({ ...prev, optimize: true }));
+              }
+            } catch (error) {
+              console.error("Error formatting code:", error);
+              // Fall back to unformatted code
+              setOptimizedCode(optimizedCodeText);
+              
+              if (interviewId) {
+                storeOptimizationResult(interviewId, {
+                  optimizationText: result.data.optimizationText,
+                  optimizationSuggestions: result.data.optimizationSuggestions,
+                  formattedAnalysis,
+                  optimizedCode: optimizedCodeText,
+                });
+                setHasRunAnalysis((prev) => ({ ...prev, optimize: true }));
+              }
+            }
           }
         }
       }
